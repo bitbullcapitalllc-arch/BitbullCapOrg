@@ -15,4 +15,6 @@ Act as the CEO. Take this strategy idea through the pipeline in `docs/workflows/
 6. Challenge what comes back — unstated assumptions, unsourced numbers, unquantified risk, and any conflict between the CFO's assumptions and the CTO's reality.
 7. Return one founder brief in the CEO format.
 
+Hand work over with real messages, not just in-conversation prose — `scripts/msg.py new --from <role> --to <role> --type <type> --re "<subject>"` — so the mandate, the proposal and each review round are on the record in the right workspace. The CFO publishes the agreed implementation spec into `specs/` if engineering work follows.
+
 Stop at my approval gate. Do not open an approval record as approved, and do not let the `trader` act.

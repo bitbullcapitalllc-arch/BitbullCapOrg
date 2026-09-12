@@ -60,3 +60,4 @@ How a technical initiative moves from a request to running in production.
 - No credentials in code, config, logs, commits, or reports.
 - A missing or unset environment setting resolves to **paper**, never live.
 - Never report a test as passing without running it, or a latency number that was not measured.
+- Engineering builds and tests against the **published** spec version in `specs/`, cited in every report. A spec question routes CTO → CFO → analyst; nobody reaches across the workspace wall to ask directly.

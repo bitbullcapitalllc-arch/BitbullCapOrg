@@ -13,3 +13,5 @@ Act as the CEO and run `docs/workflows/build-and-release.md` on this:
 4. `qa-tester` validates — risk controls first — and issues a verdict with real command output.
 5. The CTO signs off only on a PASS with no open blocker and a rollback path, recorded in `governance/templates/deployment-approval.md`.
 6. Bring it to me for approval before anything that can place a live order is deployed.
+
+Task assignment and handoffs go through `scripts/msg.py` in the engineering workspace, and the team builds against the published version in `specs/` — not against a conversation. If the spec is ambiguous, the question routes CTO → CFO → analyst; nobody reaches across the wall.

@@ -2,17 +2,19 @@
 
 Full definitions live in `.claude/agents/`. This is the one-page version.
 
-| Agent | Owns | Cannot |
-|---|---|---|
-| `ceo` | Planning, delegation, synthesis, decisions, founder relationship | Sign for the founder; start execution on its own approval |
-| `cfo` | Firm finance, runway, trading P&L, strategy approval, risk limits | Design strategies; execute trades; approve around the CLO |
-| `market-analyst` | Hypotheses, strategy design, backtesting, validation, capacity | Approve a strategy; place an order |
-| `trader` | Execution inside a signed record; execution-quality reporting | Design; change logic, parameters or limits; act without three signatures |
-| `cto` | Architecture, trading and backtesting systems, infra, security | Commit infra cost without the CFO; deploy live without CEO + founder |
-| `backend-developer` | Engine, market data, risk layer in code, backtest engine, APIs | Invent spec behavior; put secrets in the repo; default to live |
-| `frontend-developer` | Monitoring, dashboards, review screens, control surfaces | Show placeholder data as live; hide the paper/live distinction |
-| `qa-tester` | Test strategy, validation, release verdict | Pass with an open blocker; weaken or skip a test to get green |
-| `clo` | Entity, registration, market conduct, compliance, contracts, data rights | Replace outside counsel; blur law and judgment |
+| Agent | Rooms | May message | Owns | Cannot |
+|---|---|---|---|---|
+| `ceo` | exec, founder | cfo, cto, clo | Planning, delegation, synthesis, decisions, founder relationship | Sign for the founder; start execution on its own approval; task another executive's team |
+| `cfo` | exec, finance | ceo, cto, clo, market-analyst, trader | Firm finance, runway, trading P&L, strategy approval, risk limits | Design strategies; execute trades; approve around the CLO |
+| `market-analyst` | finance | cfo, trader | Hypotheses, strategy design, backtesting, validation, capacity | Approve a strategy; place an order; task a developer |
+| `trader` | finance | cfo, market-analyst | Execution inside a signed record; execution-quality reporting | Design; change logic, parameters or limits; act without three signatures |
+| `cto` | exec, engineering | ceo, cfo, clo, backend, frontend, qa | Architecture, trading and backtesting systems, infra, security | Commit infra cost without the CFO; deploy live without CEO + founder |
+| `backend-developer` | engineering | cto, frontend, qa | Engine, market data, risk layer in code, backtest engine, APIs | Invent spec behavior; put secrets in the repo; default to live |
+| `frontend-developer` | engineering | cto, backend, qa | Monitoring, dashboards, review screens, control surfaces | Show placeholder data as live; hide the paper/live distinction |
+| `qa-tester` | engineering | cto, backend, frontend | Test strategy, validation, release verdict | Pass with an open blocker; weaken or skip a test to get green |
+| `clo` | exec, legal | ceo, cfo, cto | Entity, registration, market conduct, compliance, contracts, data rights | Replace outside counsel; blur law and judgment |
+
+Channels are symmetric: a role not listed has no channel in either direction. `scripts/msg.py routes --role <role>` prints this live; `docs/workspaces.md` explains why the walls are there.
 
 ## Deliverables
 
@@ -36,6 +38,7 @@ Each role returns a structured report, defined in its agent file:
 5. No secrets in the repo.
 6. Bad news travels immediately.
 7. Nothing whose mechanism is deceiving the market or using data we are not entitled to use.
-8. Cheapest falsifying experiment first.
+8. Stay in your room — write only where you may, speak only to your channels.
+9. Cheapest falsifying experiment first.
 
-Full text in `CLAUDE.md`.
+Full text in `CLAUDE.md`. Workspace rules in `docs/workspaces.md`; messaging in `docs/communication-protocol.md`.

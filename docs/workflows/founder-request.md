@@ -18,6 +18,14 @@ Tasks, owner per task, the exact deliverable each owner returns, dependencies an
 
 Each owner gets: context, constraints (capital, time, risk, regulatory), the deliverable format, and what is out of scope. Work goes through the owning executive, never around them to their team.
 
+Dispatch as messages, not only in conversation, so the ask is on the record in the right room:
+
+```bash
+scripts/msg.py new --from ceo --to cfo --type work-order --re "<ask>" --needs-by <date> --body-file <file>
+```
+
+The CEO has channels to the `cfo`, `cto` and `clo` only. Work for an analyst, trader or developer is requested from their executive — and if nested delegation is unavailable, the CEO may act as courier under the rules in `docs/workspaces.md`, carrying the executive's work order without taking ownership of the output.
+
 ## 4. Collect and challenge
 
 The CEO does not forward reports. Look for:

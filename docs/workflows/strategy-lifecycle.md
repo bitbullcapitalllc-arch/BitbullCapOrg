@@ -83,6 +83,25 @@ From an idea to live capital. Every stage has an owner and an exit condition; a 
 **Owner: CFO → CEO → founder.** At the review date or on a trigger: scale up (an amendment to the record, requiring the same signature chain), hold, or kill. Decaying edge is normal — the failure mode to avoid is scaling a strategy whose edge has already gone.
 **Exit:** decision recorded in `governance/decision-log.md`.
 
+## The message trail
+
+Each stage is a message on the record, in the workspace the two parties share (`docs/communication-protocol.md`):
+
+| Stage | Message |
+|---|---|
+| 1 | `ceo → cfo` work-order — the mandate |
+| 2 | `cfo → market-analyst` work-order, then `market-analyst → cfo` report |
+| 3 | `cfo → cto` question in the exec room, `cto → cfo` report |
+| 4 | `cfo → clo` question, `clo → cfo` report |
+| 5 | `cfo → market-analyst` review (sent back) or the approval record opened |
+| 6 | `cfo → ceo` approval-request |
+| 7 | CEO brief to the founder, archived in `workspaces/founder/briefs/` |
+| 8-9 | `cto → developers` / `cto → qa-tester` work-orders, reports back |
+| 10-12 | `cfo → trader` work-order citing the signed record; `trader → cfo` execution reports; `halt-notice` on any breach |
+| 13 | `cfo → ceo` report, decision logged |
+
+The analyst never messages a developer and the CEO never messages the trader — there is no channel. The implementation spec crosses through `specs/`, published by the CFO.
+
 ## Amendments
 
 Any change to logic, parameters, or limits re-enters at stage 5 and needs CFO → CEO → founder again. The `trader` never adjusts a limit conversationally.
