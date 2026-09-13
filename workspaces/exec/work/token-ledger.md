@@ -26,6 +26,7 @@ Changes in effect from this point: sub-agents on Sonnet (`cost-optimizer` on Hai
 | Date | Agent | Task | Model | Tokens | vs. comparable baseline |
 |---|---|---|---|---|---|
 | 2026-09-13 | *(none)* | CFO review round — 3 deliverables reviewed, cost/fill model published as spec v1 | opus-5 (cfo, in-session) | not measured by me | **0 sub-agent dispatches.** Reading list was fixed at 4 files by the work order; I dispatched nothing, so the marginal dispatch cost of this round is zero. The alternative — sending the two drafts to an agent for summary — would have added a full orientation plus a second copy of each document. Recorded as a zero-dispatch round rather than left blank. |
+| 2026-09-13 | *(none)* | EMA initiative stages 4-6: pre-registration review (8 amendments), bar-data annex published, rules+dashboard spec published, approval-request to CEO, handoff to CTO | opus-5 (cfo, in-session) | not measurable from inside this session | **0 sub-agent dispatches.** Reading list fixed at 4 files by the work order; I added 5 targeted `sed`/`grep` reads of published specs rather than re-reading them whole, and dispatched nobody. The alternative — sending the pre-registration back to the analyst for a revision round — would have cost a full agent orientation plus a second copy of the note, to produce amendments I was going to own as the reviewer anyway. Amending-on-review beats send-back-and-re-read when the reviewer owns the output. |
 
 ### Measured by the CEO (the dispatcher sees the number the agent cannot)
 

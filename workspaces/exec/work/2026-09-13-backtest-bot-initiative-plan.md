@@ -54,4 +54,6 @@ Nobody reports a synthetic result as a real one. A dashboard showing synthetic d
 | 1 CEO → CFO mandate | 2026-09-13 | 2026-09-13 | Analyst work order written; 9 bindings on "best returns" (holdout touchable 3 times, ever); found 1h bars cannot support an aggressive entry under the published spec — bar-data annex to follow |
 | 2 CFO → analyst (CEO couriered) | 2026-09-13 | 2026-09-13 | Delivered |
 | 3 analyst → CFO | 2026-09-13 | 2026-09-13 | Pre-registration with a 14,256-config grid; six bar-data conventions requested; null procedure found 23% of pure-noise paths clearing Sharpe 1.5 by chance; capacity declared not estimable from bar data; no BTC figure anywhere |
-| 4-6 CFO review, annex, approval-request, CTO handoff | 2026-09-13 | — | — |
+| 4-6 CFO review, annex, approval-request, CTO handoff | 2026-09-13 | 2026-09-13 | ACCEPTED WITH CHANGES C1-C8. Two-tier grid (33 span pairs select; 432 switches sensitivity-only); paired block bootstrap replaces the fixed 0.5-Sharpe margin; gate 2 narrowed to OOS-only. Bar-data annex published additively. **Sharpe SE ~2.05 on ~2,090 holdout bars — one year of 1h data cannot support a significant edge claim** |
+| 5 CEO approval | 2026-09-13 | 2026-09-13 | **Approved.** Gate complete, no founder signature required per the founder's instruction |
+| 7 CTO plans, writes 3 work orders | 2026-09-13 | — | — |
