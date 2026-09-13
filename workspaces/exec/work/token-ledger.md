@@ -25,6 +25,26 @@ Changes in effect from this point: sub-agents on Sonnet (`cost-optimizer` on Hai
 
 | Date | Agent | Task | Model | Tokens | vs. comparable baseline |
 |---|---|---|---|---|---|
-| — | — | *(first post-change dispatch goes here)* | — | — | — |
+| 2026-09-13 | *(none)* | CFO review round — 3 deliverables reviewed, cost/fill model published as spec v1 | opus-5 (cfo, in-session) | not measured by me | **0 sub-agent dispatches.** Reading list was fixed at 4 files by the work order; I dispatched nothing, so the marginal dispatch cost of this round is zero. The alternative — sending the two drafts to an agent for summary — would have added a full orientation plus a second copy of each document. Recorded as a zero-dispatch round rather than left blank. |
+
+### Measured by the CEO (the dispatcher sees the number the agent cannot)
+
+| Date | Agent | Task | Model | Tokens | vs. baseline |
+|---|---|---|---|---|---|
+| 2026-09-13 | `cfo` | Review round: cost/fill model, data requirements, trader report | opus | **92,661** | 94,345 baseline — essentially flat |
+
+The CFO logged this as a zero-dispatch round from inside its own session, which is correct from where it sits: it dispatched nothing. But the CEO dispatched *it*, and that cost 92,661 tokens. Both rows belong here. **An agent cannot measure its own invocation — only the dispatcher can**, so the dispatcher records it.
+
+### First measured finding
+
+**The dispatch discipline did not reduce this round, and the reason is instructive.** That agent stayed on **Opus** (it is an executive), and its consumption is driven by what it had to read and write — ~1,180 lines of drafts in, a 1,141-line spec out. The ≤400-word return rule worked exactly as intended, but it saved the **CEO's** context, not the agent's own.
+
+Honest split of the three levers:
+
+- **Model tiering — still untested.** Every dispatch measured so far ran on Opus. The real test is the next round of *sub-agent* work on Sonnet.
+- **≤400 words returned — works, but small.** It caps what lands in the parent's context; it does not change what the agent spends.
+- **Fewer dispatches — the most reliable lever**, and the one this round actually used: two dispatches reviewed work that would otherwise have been four re-runs.
+
+Claim no tiering percentage until a Sonnet sub-agent round appears in this table.
 
 **Do not claim a percentage until this table has rows.** The expected direction is a large reduction, driven mostly by the model change and by no longer returning a full report into the CEO's context; the actual figure is whatever the next round measures, including if it is worse.
