@@ -2,6 +2,8 @@
 
 Full definitions live in `.claude/agents/`. This is the one-page version.
 
+Every role now carries the firm mandate — *build profitable strategies that can be built, automated and executed with minimum human efforts*, across Topstep, Webull, Coinbase and Polymarket — with its own role-specific implications. Full text: `specs/2026-09-13-firm-mandate-v1.md`.
+
 | Agent | Rooms | May message | Owns | Cannot |
 |---|---|---|---|---|
 | `ceo` | exec, founder | cfo, cto, clo | Planning, delegation, synthesis, decisions, founder relationship | Sign for the founder; start execution on its own approval; task another executive's team |

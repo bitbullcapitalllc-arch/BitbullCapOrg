@@ -1,6 +1,10 @@
 # Bitbull Capital — Organization
 
-The operating structure of **Bitbull Capital**, a high-frequency trading firm in startup phase, expressed as an agent team: roles, chain of command, and the approval gates that sit in front of real money.
+The operating structure of **Bitbull Capital**, a trading firm in startup phase, expressed as an agent team: roles, chain of command, and the approval gates that sit in front of real money.
+
+> **Mission: build profitable strategies that can be built, automated and executed with minimum human efforts.**
+
+**Markets:** Topstep · Webull · Coinbase · Polymarket. Full mandate, decision heuristics and per-venue verification owners: `specs/2026-09-13-firm-mandate-v1.md`.
 
 ## The team
 
