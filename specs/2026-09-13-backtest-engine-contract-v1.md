@@ -14,16 +14,15 @@ design document: where it says MUST, a test may assert it and a review may rejec
 These are economics, not engineering, and are owed by the `cfo` as published specs. The engine MUST be
 shaped so each plugs in **by version reference** and MUST refuse to run when one it needs is absent:
 
-| Hole | Blocks |
-|---|---|
-| Fill model — price rule, partials, participation cap, queue model, latency parameter, intrabar path assumption | `FillSimulator` (§7) |
-| Cost model — components, formulas, rounding direction | fee records (§7) |
-| Metric definitions — return convention, annualization, risk-free, drawdown basis, warm-up treatment | reported metrics (run-output contract §4.4) |
-| Risk limit values, and whether a value exactly at a limit is a breach | `RiskGate` thresholds (§6) |
-| "Day" for the daily loss limit — timezone, session boundary, realized vs unrealized, reset-on-restart | daily loss control (§6) |
+| Hole | Status | Blocks |
+|---|---|---|
+| Fill model and cost model — price rule, partials, participation, queue, latency, intrabar path, fee formulas, rounding | **Published** as `specs/2026-09-13-cost-and-fill-model-v1.md`, spec version string `cost-and-fill-model-v1`. Formulas and rounding are specified; **every venue-sourced value is `unset`** pending the founder's venue decision | Implementation of `FillSimulator` (§7) can start against the published formulas; a *run* still cannot, because the model refuses to construct with any needed parameter `unset` |
+| Metric definitions — return convention, annualization, risk-free, drawdown basis, warm-up treatment | Not published | reported metrics (run-output contract §5.1) |
+| Risk limit values, and whether a value exactly at a limit is a breach | Not published | `RiskGate` thresholds and boundary tests (§6) |
+| "Day" for the daily loss limit — timezone, session boundary, realized vs unrealized vs both, reset-on-restart | Not published | daily loss control (§6) |
 
 Everything else in this spec is decided and buildable today. QA's integrity suite (determinism, leakage,
-accounting, risk mechanism) needs none of the five holes above.
+accounting, risk mechanism) needs none of the holes above.
 
 ## 1. Package layout (closes gap 2)
 
@@ -169,10 +168,16 @@ Strategy -> OrderIntent -> RiskGate -> ApprovedOrder -> SimulatedVenue.submit
 
 ## 7. Fill simulation and costs
 
-`FillSimulator` is an interface with one implementation per published CFO model version. It MUST:
+`FillSimulator` is an interface with one implementation per published CFO model version. The model in force is
+`specs/2026-09-13-cost-and-fill-model-v1.md` (`spec_version: cost-and-fill-model-v1`); where this section and that
+spec differ on an economic rule, **that spec wins and this one is amended**. It MUST:
 
-- refuse to construct without a `cost_model_id` and `fill_model_id` with versions, which are recorded in the
-  manifest;
+- refuse to construct without the model's `spec_version` and the full parameter dict, both recorded in the
+  manifest, and **refuse to construct — and so refuse to start the run — if any parameter it needs is `unset` or
+  absent**. No defaults anywhere, no `enabled` flag anywhere;
+- record the model's `bracket` in the manifest, so a base-bracket number can never be read as a pessimistic one;
+- treat a change to any model parameter as a **new spec version that invalidates every prior result**: the
+  engine MUST NOT compare or chart two runs with different `spec_version` together;
 - attach a fee record to **every** fill — possibly zero, never absent — naming the cost model version that
   produced it. A zero-cost run MUST be impossible to produce silently;
 - fill strictly after submission: `fill.seq >= order.submit_seq + modeled_latency_events`, and never within the

@@ -236,17 +236,39 @@ Changes from `2026-09-12-backtest-readiness-assessment.md` are marked. Ordering 
 | 11 | Run output + report | backend (+ frontend renderer) | **CLOSED as a spec.** `specs/2026-09-13-run-output-contract-v1.md`. Renderer reassigned to frontend. |
 | 14 | **Alerting, heartbeat, watchdog** | backend (+ qa tests) | **NEW — §6 below.** Required by the mandate; was inside my "deferred: monitoring/alerting stack", wrongly. |
 | 10b | Test harness: integrity suite | qa | **REVISED.** Buildable now, needs no strategy spec. Leakage battery per contract §11.1. |
-| 7 | Fill simulator | backend | **BLOCKED on the CFO's fill model.** Interface published; implementation cannot start. |
-| 10c | Correctness suite (T4, T5, T7, T10) | qa | **BLOCKED on the CFO**: strategy spec, cost model, metric definitions. |
+| 7 | Fill simulator | backend | **UNBLOCKED IN FORM this round** — see §5.1. `specs/2026-09-13-cost-and-fill-model-v1.md` publishes the formulas and rounding; every venue-sourced value is `unset`, so the model must refuse to construct and the run must refuse to start. Implementation can begin; a result cannot be produced. |
+| 10c | Correctness suite (T4, T5, T7, T10) | qa | **PARTIALLY UNBLOCKED.** T4/A7 (fill attainability) and T7/A14 (cost applied = model recomputed) now have a spec to assert against, with parameter values injected by the test. T5 still needs a strategy spec; T10 still needs metric definitions. |
 | 12 | CI | backend | **REVISED.** `make verify` = `uv sync --frozen && pytest` in a **fresh temp clone** is the $0 substitute that buys the clean-checkout property. GitHub Actions free-tier applicability is **unverified** and I am stating no number. Required before QA issues any PASS. |
 | 13 | Spec index / citation check | cto | **DONE enough to use.** `scripts/spec_lint.py` exists and passes (§7); manifest-citation checking lands with gap 6. |
 
-**Five asks of the CFO via the exec room**, in cost-to-answer order. The first two are cheap and block *risk*
-tests rather than strategy tests, so they should come first: (1) is a value exactly at a limit a breach?
-(2) what does "day" mean for the daily loss limit — timezone, session boundary, realized vs unrealized vs both,
-does a restart reset it? (3) the fill model; (4) the cost model; (5) metric definitions. Until 3–5 land, there
-are **zero** correctness tests in the firm — the integrity suite is all that can exist, and it is worth building
-anyway because it is what makes a later correctness result believable.
+### 5.1 The CFO published the cost and fill model mid-round — what it changes
+
+`specs/2026-09-13-cost-and-fill-model-v1.md` (spec version string `cost-and-fill-model-v1`) appeared in the tree
+while I was writing this note. I have read its §0, §0.1, §2 and §13.3 and **not** yet reviewed it end to end, so
+this is a status update and not an engineering review of it. What I can already act on:
+
+- It specifies formulas, rounding rules and a parameter registry in which **every venue-sourced value is written
+  `unset` explicitly**, with the requirement that the engine refuse to construct the model and refuse to start
+  the run if any needed parameter is `unset`. That is exactly the fail-closed shape I asked for, and it is now
+  engine contract §7.
+- `bracket` (`base` | `pessimistic`) is part of the manifest, a change to any parameter is a **new spec version
+  that invalidates every prior result**, and two runs with different `spec_version` must never be compared or
+  charted together. I have written both into the contracts — §7 of the engine contract and §6 of the run-output
+  contract.
+- Its §0 states the model is **unvalidated**, that the backtester and paper executor share it by design so
+  agreement between them is a tautology, and that only real fills validate a fill model. I endorse that without
+  reservation and it must survive into every report the engine produces.
+- Where that spec and my engine contract differ on an **economic** rule, that spec wins and mine is amended.
+  Where they differ on an **engine semantic** — ordering, tie-break, determinism, causality — mine wins. I have
+  said so in §7 of the contract so nobody has to guess which document governs.
+- Next step on my side, not this round: QA reviews it for testability, and I take back to the CFO any formula I
+  cannot turn into an assertion. Their §7.4 (calibration) is the part I expect to have the most to say about.
+
+**Three asks of the CFO remain**, in cost-to-answer order. The first two are cheap and block *risk* tests rather
+than strategy tests: (1) is a value exactly at a limit a breach? (2) what does "day" mean for the daily loss
+limit — timezone, session boundary, realized vs unrealized vs both, does a restart reset it? (3) metric
+definitions. A strategy spec remains the gap that blocks T5, and the model's parameter values remain blocked on
+the founder's venue decision — which is the right place for them to be blocked.
 
 **Deferred, unchanged:** live adapters, credentials, real-time feeds, colocation, latency optimization, any
 non-Python component, a database server, multi-venue support, secrets infrastructure, **and dashboards** — but

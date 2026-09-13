@@ -32,6 +32,7 @@ Changes in effect from this point: sub-agents on Sonnet (`cost-optimizer` on Hai
 | Date | Agent | Task | Model | Tokens | vs. baseline |
 |---|---|---|---|---|---|
 | 2026-09-13 | `cfo` | Review round: cost/fill model, data requirements, trader report | opus | **92,661** | 94,345 baseline — essentially flat |
+| 2026-09-13 | `cto` | Review round: backend plan, QA criteria, frontend contract; 2 specs published | opus | **107,509** | 90,913 baseline — **up 18%** |
 
 The CFO logged this as a zero-dispatch round from inside its own session, which is correct from where it sits: it dispatched nothing. But the CEO dispatched *it*, and that cost 92,661 tokens. Both rows belong here. **An agent cannot measure its own invocation — only the dispatcher can**, so the dispatcher records it.
 
@@ -45,6 +46,17 @@ Honest split of the three levers:
 - **≤400 words returned — works, but small.** It caps what lands in the parent's context; it does not change what the agent spends.
 - **Fewer dispatches — the most reliable lever**, and the one this round actually used: two dispatches reviewed work that would otherwise have been four re-runs.
 
-Claim no tiering percentage until a Sonnet sub-agent round appears in this table.
+**Round total: 200,170 tokens for 2 dispatches, against 324,550 for 4 baseline dispatches.** Per dispatch it is flat-to-up — the CTO round cost 18% *more* than its baseline, because it did more: it published two specs as well as reviewing three documents. The saving is entirely in dispatching two agents instead of four, and in what no longer lands in the CEO's context.
+
+Claim no tiering percentage until a Sonnet sub-agent round appears in this table. On current evidence the honest statement to the founder is: **one lever is working (fewer dispatches), one is small but real (capped returns), one is still unmeasured (tiering).**
+
+### CTO review round — 2026-09-13
+
+| Date | Agent | Task | Model | Tokens | Note |
+|---|---|---|---|---|---|
+| 2026-09-13 | *(none dispatched)* | CTO review of 3 deliverables; 2 specs published | opus (`cto`, in-session) | not measurable from inside the session | **Zero sub-agent dispatches.** The reviewing executive read 4 named files; no agent paid an orientation cost, and nothing was re-run to be reviewed. The cheapest round available is the one where the reviewer does the reading. |
+
+Same caveat as the CFO's row above: all three deliverables reviewed were produced on **Opus before** the tiering
+change, so this round is not a Sonnet-quality datapoint in either direction. The test is the next sub-agent round.
 
 **Do not claim a percentage until this table has rows.** The expected direction is a large reduction, driven mostly by the model change and by no longer returning a full report into the CEO's context; the actual figure is whatever the next round measures, including if it is worse.

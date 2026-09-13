@@ -157,6 +157,10 @@ drift, and the drift surfaces as the analyst reading a number the JSON does not 
 Order: run id and status; mode; provenance including `code_dirty`; warnings; metrics; series and blotter
 summaries. Provenance before results, so nobody reads a number before they know what produced it.
 
+`report.md` and any later comparison view MUST refuse to present two runs with different
+`cost_and_fill_model.spec_version` on the same axes, and MUST show the model's `bracket` next to any net-P&L
+number — both required by `specs/2026-09-13-cost-and-fill-model-v1.md` §13.3.
+
 QA assertion this enables: regenerate `report.md` from `run.json` and compare.
 
 ## 7. Ownership
