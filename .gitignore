@@ -15,6 +15,10 @@ data/
 *.csv
 *.parquet
 
+# ...but golden test fixtures are evidence, not output, and must be committed
+# (CTO finding S2: `git add tests/fixtures/x.csv` silently added nothing)
+!tests/fixtures/**
+
 # Python / Node / editor noise
 __pycache__/
 *.py[cod]
