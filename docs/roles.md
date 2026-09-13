@@ -7,14 +7,15 @@ Every role now carries the firm mandate — *build profitable strategies that ca
 | Agent | Rooms | May message | Owns | Cannot |
 |---|---|---|---|---|
 | `ceo` | exec, founder | cfo, cto, clo | Planning, delegation, synthesis, decisions, founder relationship | Sign for the founder; start execution on its own approval; task another executive's team |
-| `cfo` | exec, finance | ceo, cto, clo, market-analyst, trader | Firm finance, runway, trading P&L, strategy approval, risk limits | Design strategies; execute trades; approve around the CLO |
-| `market-analyst` | finance | cfo, trader | Hypotheses, strategy design, backtesting, validation, capacity | Approve a strategy; place an order; task a developer |
-| `trader` | finance | cfo, market-analyst | Execution inside a signed record; execution-quality reporting | Design; change logic, parameters or limits; act without three signatures |
+| `cfo` | exec, finance | ceo, cto, clo, market-analyst, trader, cost-optimizer | Firm finance, runway, trading P&L, strategy approval, risk limits | Design strategies; execute trades; approve around the CLO |
+| `market-analyst` | finance | cfo, trader, cost-optimizer | Hypotheses, strategy design, backtesting, validation, capacity | Approve a strategy; place an order; task a developer |
+| `trader` | finance | cfo, market-analyst, cost-optimizer | Execution inside a signed record; execution-quality reporting | Design; change logic, parameters or limits; act without three signatures |
 | `cto` | exec, engineering | ceo, cfo, clo, backend, frontend, qa | Architecture, trading and backtesting systems, infra, security | Commit infra cost without the CFO; deploy live without CEO + founder |
 | `backend-developer` | engineering | cto, frontend, qa | Engine, market data, risk layer in code, backtest engine, APIs | Invent spec behavior; put secrets in the repo; default to live |
 | `frontend-developer` | engineering | cto, backend, qa | Monitoring, dashboards, review screens, control surfaces | Show placeholder data as live; hide the paper/live distinction |
 | `qa-tester` | engineering | cto, backend, frontend | Test strategy, validation, release verdict | Pass with an open blocker; weaken or skip a test to get green |
-| `clo` | exec, legal | ceo, cfo, cto | Entity, registration, market conduct, compliance, contracts, data rights | Replace outside counsel; blur law and judgment |
+| `clo` | exec, legal | ceo, cfo, cto |
+| `cost-optimizer` | finance | cfo, market-analyst, trader | Token and operational cost analysis, savings proposals | Write outside the finance room; implement without CFO approval | Entity, registration, market conduct, compliance, contracts, data rights | Replace outside counsel; blur law and judgment |
 
 Channels are symmetric: a role not listed has no channel in either direction. `scripts/msg.py routes --role <role>` prints this live; `docs/workspaces.md` explains why the walls are there.
 

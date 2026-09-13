@@ -1,27 +1,294 @@
 {
-  "version": 1,
-  "description": "Authoritative map of Bitbull Capital's agent workspaces, membership and write access.",
+  "version": 2,
+  "description": "Authoritative map of Bitbull Capital's agent workspaces, membership and write access. Read by scripts/msg.py and scripts/check_boundaries.py. Changing this file changes the firm's boundaries: CEO-only, and a change belongs in governance/decision-log.md.",
   "roles": {
-    "ceo": {"title": "Chief Executive Officer", "reports_to": "founder", "workspaces": ["exec", "founder"]},
-    "cfo": {"title": "Chief Financial Officer", "reports_to": "ceo", "workspaces": ["exec", "finance"]},
-    "cost-optimizer": {"title": "Cost Optimizer", "reports_to": "cfo", "workspaces": ["finance"]},
-    "cto": {"title": "Chief Technology Officer", "reports_to": "ceo", "workspaces": ["exec", "engineering"]},
-    "clo": {"title": "Chief Legal Officer", "reports_to": "ceo", "workspaces": ["exec", "legal"]},
-    "market-analyst": {"title": "Quantitative Analyst", "reports_to": "cfo", "workspaces": ["finance"]},
-    "trader": {"title": "Execution Trader", "reports_to": "cfo", "workspaces": ["finance"]},
-    "backend-developer": {"title": "Backend Developer", "reports_to": "cto", "workspaces": ["engineering"]},
-    "frontend-developer": {"title": "Frontend Developer", "reports_to": "cto", "workspaces": ["engineering"]},
-    "qa-tester": {"title": "QA Engineer", "reports_to": "cto", "workspaces": ["engineering"]}
+    "ceo": {
+      "title": "Chief Executive Officer",
+      "reports_to": "founder",
+      "workspaces": [
+        "exec",
+        "founder"
+      ]
+    },
+    "cfo": {
+      "title": "Chief Financial Officer",
+      "reports_to": "ceo",
+      "workspaces": [
+        "exec",
+        "finance"
+      ]
+    },
+    "cto": {
+      "title": "Chief Technology Officer",
+      "reports_to": "ceo",
+      "workspaces": [
+        "exec",
+        "engineering"
+      ]
+    },
+    "clo": {
+      "title": "Chief Legal Officer",
+      "reports_to": "ceo",
+      "workspaces": [
+        "exec",
+        "legal"
+      ]
+    },
+    "market-analyst": {
+      "title": "Quantitative Analyst",
+      "reports_to": "cfo",
+      "workspaces": [
+        "finance"
+      ]
+    },
+    "trader": {
+      "title": "Execution Trader",
+      "reports_to": "cfo",
+      "workspaces": [
+        "finance"
+      ]
+    },
+    "backend-developer": {
+      "title": "Backend Developer",
+      "reports_to": "cto",
+      "workspaces": [
+        "engineering"
+      ]
+    },
+    "frontend-developer": {
+      "title": "Frontend Developer",
+      "reports_to": "cto",
+      "workspaces": [
+        "engineering"
+      ]
+    },
+    "qa-tester": {
+      "title": "QA Engineer",
+      "reports_to": "cto",
+      "workspaces": [
+        "engineering"
+      ]
+    },
+    "cost-optimizer": {
+      "title": "Cost Optimizer",
+      "reports_to": "cfo",
+      "workspaces": [
+        "finance"
+      ]
+    }
   },
   "workspaces": {
-    "exec": {"path": "workspaces/exec", "owner": "ceo", "members": ["ceo", "cfo", "cto", "clo"], "readers": [], "purpose": "C-suite coordination and founder communication."},
-    "finance": {"path": "workspaces/finance", "owner": "cfo", "members": ["cfo", "cost-optimizer", "market-analyst", "trader"], "readers": [], "purpose": "Trading floor, research, cost optimization."},
-    "engineering": {"path": "workspaces/engineering", "owner": "cto", "members": ["cto", "backend-developer", "frontend-developer", "qa-tester"], "readers": [], "purpose": "Engineering work and testing."},
-    "legal": {"path": "workspaces/legal", "owner": "clo", "members": ["clo"], "readers": ["ceo"], "purpose": "Legal analysis and compliance."},
-    "founder": {"path": "workspaces/founder", "owner": "ceo", "members": ["ceo"], "readers": [], "purpose": "Founder briefs and approvals."}
+    "exec": {
+      "path": "workspaces/exec",
+      "owner": "ceo",
+      "members": [
+        "ceo",
+        "cfo",
+        "cto",
+        "clo"
+      ],
+      "readers": [],
+      "purpose": "The C-suite room. Cross-functional coordination, peer-to-peer executive traffic, and everything on its way to the founder."
+    },
+    "finance": {
+      "path": "workspaces/finance",
+      "owner": "cfo",
+      "members": [
+        "cfo",
+        "market-analyst",
+        "trader",
+        "cost-optimizer"
+      ],
+      "readers": [],
+      "purpose": "The trading floor. Research mandates, strategy proposals, review rounds, execution instructions and execution reports."
+    },
+    "engineering": {
+      "path": "workspaces/engineering",
+      "owner": "cto",
+      "members": [
+        "cto",
+        "backend-developer",
+        "frontend-developer",
+        "qa-tester"
+      ],
+      "readers": [],
+      "purpose": "The engineering room. Task assignment, design notes, implementation handoffs, test plans and test reports."
+    },
+    "legal": {
+      "path": "workspaces/legal",
+      "owner": "clo",
+      "members": [
+        "clo"
+      ],
+      "readers": [
+        "ceo"
+      ],
+      "purpose": "The CLO's working room. Draft analysis, research notes and contract markup before a position is issued."
+    },
+    "founder": {
+      "path": "workspaces/founder",
+      "owner": "ceo",
+      "members": [
+        "ceo"
+      ],
+      "readers": [],
+      "purpose": "Briefs the CEO has put to the founder, archived. The founder reads and writes here freely; no other agent may."
+    }
   },
+  "shared_read": [
+    "CLAUDE.md",
+    "README.md",
+    "docs/**",
+    "specs/**",
+    "governance/**",
+    "workspaces/registry.json",
+    "workspaces/_templates/**",
+    "scripts/**",
+    ".claude/agents/**"
+  ],
   "write_rules": {
-    "workspaces/finance/**": ["cfo", "cost-optimizer", "market-analyst", "trader"],
-    "workspaces/exec/**": ["ceo", "cfo", "cto", "clo"]
+    "CLAUDE.md": [
+      "ceo"
+    ],
+    "README.md": [
+      "ceo"
+    ],
+    ".gitignore": [
+      "ceo"
+    ],
+    ".claude/**": [
+      "ceo"
+    ],
+    "docs/**": [
+      "ceo"
+    ],
+    "scripts/**": [
+      "cto"
+    ],
+    "specs/**": [
+      "ceo",
+      "cfo",
+      "cto",
+      "clo"
+    ],
+    "governance/decision-log.md": [
+      "ceo"
+    ],
+    "governance/approval-policy.md": [
+      "ceo"
+    ],
+    "governance/templates/**": [
+      "ceo"
+    ],
+    "governance/policies/**": [
+      "ceo",
+      "cfo",
+      "clo"
+    ],
+    "governance/approvals/**": [
+      "ceo",
+      "cfo",
+      "cto",
+      "clo"
+    ],
+    "workspaces/registry.json": [
+      "ceo"
+    ],
+    "workspaces/_templates/**": [
+      "ceo"
+    ],
+    "workspaces/exec/**": [
+      "ceo",
+      "cfo",
+      "cto",
+      "clo"
+    ],
+    "workspaces/finance/**": [
+      "cfo",
+      "market-analyst",
+      "trader",
+      "cost-optimizer"
+    ],
+    "workspaces/engineering/**": [
+      "cto",
+      "backend-developer",
+      "frontend-developer",
+      "qa-tester"
+    ],
+    "workspaces/legal/**": [
+      "clo"
+    ],
+    "workspaces/founder/**": [
+      "ceo"
+    ],
+    "src/**": [
+      "cto",
+      "backend-developer",
+      "frontend-developer"
+    ],
+    "tests/**": [
+      "cto",
+      "qa-tester",
+      "backend-developer",
+      "frontend-developer"
+    ],
+    "pyproject.toml": [
+      "cto",
+      "backend-developer"
+    ],
+    "uv.lock": [
+      "cto",
+      "backend-developer"
+    ],
+    ".python-version": [
+      "cto"
+    ],
+    "Makefile": [
+      "cto"
+    ],
+    ".github/**": [
+      "cto"
+    ],
+    ".env.example": [
+      "cto"
+    ],
+    "config/**": [
+      "cto",
+      "backend-developer"
+    ],
+    "data/**": [
+      "cto",
+      "backend-developer",
+      "market-analyst"
+    ],
+    "workspaces/*/README.md": [
+      "ceo"
+    ],
+    "runs/**": [
+      "cto",
+      "backend-developer",
+      "market-analyst"
+    ]
+  },
+  "message_types": [
+    "work-order",
+    "report",
+    "review",
+    "question",
+    "escalation",
+    "approval-request",
+    "halt-notice",
+    "fyi"
+  ],
+  "broadcast_types": [
+    "halt-notice"
+  ],
+  "notes": {
+    "bridges": "An executive is the only member of two workspaces, and the only path between them. CFO bridges finance<->exec, CTO bridges engineering<->exec, CLO bridges legal<->exec, CEO bridges exec<->founder.",
+    "courier_exception": "When nested delegation is unavailable, the CEO may carry an executive's work order to a sub-agent and the sub-agent's raw output back. The CEO is transport only: the artifact is written and filed by the owning team in their own workspace, and is not reviewed until that executive reviews it.",
+    "cross_team_artifacts": "Anything one team needs from another is published by a bridging executive into specs/ (firm-wide read). Team workspaces are never read across the wall.",
+    "halt_notices": "A halt-notice may be posted to any workspace the sender can write, and addressed to any role, bypassing the hierarchy. Stopping is never gated.",
+    "ungoverned_paths": "Every path that decides what code runs has an owner: build and CI files are the CTO's, config is shared with the backend developer, data/** is the sanctioned home for market-data snapshots (analyst and backend write it; it is gitignored, so the audit cannot see it \u2014 evidence must be committed as .md/.json with a checksum). Room README charters are structural and therefore the CEO's, like the registry itself.",
+    "foundation": "`.claude/foundation.md` carries the mandate, the nine firm-wide rules and the messaging rules in one copy. It is NOT auto-loaded by the harness \u2014 only CLAUDE.md is \u2014 so CLAUDE.md instructs every agent to read it, and the safety-critical rules stay inline in CLAUDE.md as well, because an unfollowed read instruction on those costs money."
   }
 }

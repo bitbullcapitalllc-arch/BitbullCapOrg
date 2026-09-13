@@ -9,7 +9,7 @@ Authoritative definition: **`workspaces/registry.json`**. This page explains it;
 ```
 workspaces/founder/      ceo                                          ← founder reads/writes freely
 workspaces/exec/         ceo · cfo · cto · clo
-workspaces/finance/      cfo · market-analyst · trader
+workspaces/finance/      cfo · market-analyst · trader · cost-optimizer
 workspaces/engineering/  cto · backend-developer · frontend-developer · qa-tester
 workspaces/legal/        clo                          (ceo may read)
 specs/                   read: everyone    write: ceo · cfo · cto · clo
@@ -21,7 +21,7 @@ governance/ docs/        read: everyone    write: per registry write_rules
 | Workspace | Members | Owner | What happens here |
 |---|---|---|---|
 | `exec` | `ceo`, `cfo`, `cto`, `clo` | `ceo` | Cross-functional coordination, peer executive traffic, founder-bound work |
-| `finance` | `cfo`, `market-analyst`, `trader` | `cfo` | Mandates, proposals, review rounds, execution instructions and reports |
+| `finance` | `cfo`, `market-analyst`, `trader`, `cost-optimizer` | `cfo` | Mandates, proposals, review rounds, execution instructions and reports |
 | `engineering` | `cto`, `backend-developer`, `frontend-developer`, `qa-tester` | `cto` | Task breakdown, design, handoffs, test plans and reports |
 | `legal` | `clo` (CEO may read) | `clo` | Draft analysis, research, contract markup before a position issues |
 | `founder` | `ceo` | `ceo` | Archived founder briefs |

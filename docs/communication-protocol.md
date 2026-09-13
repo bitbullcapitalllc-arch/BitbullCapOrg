@@ -7,14 +7,15 @@ How agents talk to each other. The rule behind every rule below: **you may speak
 | Role | May message directly |
 |---|---|
 | `ceo` | `cfo`, `cto`, `clo` *(and the founder, in conversation)* |
-| `cfo` | `ceo`, `cto`, `clo`, `market-analyst`, `trader` |
+| `cfo` | `ceo`, `cto`, `clo`, `market-analyst`, `trader`, `cost-optimizer` |
 | `cto` | `ceo`, `cfo`, `clo`, `backend-developer`, `frontend-developer`, `qa-tester` |
 | `clo` | `ceo`, `cfo`, `cto` |
-| `market-analyst` | `cfo`, `trader` |
-| `trader` | `cfo`, `market-analyst` |
+| `market-analyst` | `cfo`, `trader`, `cost-optimizer` |
+| `trader` | `cfo`, `market-analyst`, `cost-optimizer` |
 | `backend-developer` | `cto`, `frontend-developer`, `qa-tester` |
 | `frontend-developer` | `cto`, `backend-developer`, `qa-tester` |
 | `qa-tester` | `cto`, `backend-developer`, `frontend-developer` |
+| `cost-optimizer` | `cfo`, `market-analyst`, `trader` |
 
 Check it live: `scripts/msg.py routes --role <role>`.
 
