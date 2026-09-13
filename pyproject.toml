@@ -1,0 +1,30 @@
+[project]
+name = "bitbull"
+version = "0.1.0"
+description = "Bitbull Capital backtesting engine — bar-mode EMA crossover build (round A: runtime, package skeleton, OHLCV loader)."
+requires-python = ">=3.11,<3.12"
+readme = "README.md"
+license = { text = "Proprietary" }
+# Runtime dependency set is deliberately minimal and closed. Do not add a
+# dependency here without the CTO's sign-off (build order B1, "do not touch").
+dependencies = [
+    "polars==1.9.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==8.3.3",
+]
+
+[tool.uv]
+package = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bitbull"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

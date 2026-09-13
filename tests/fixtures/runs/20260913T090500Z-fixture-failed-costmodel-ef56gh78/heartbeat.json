@@ -1,0 +1,5 @@
+{
+  "_fixture_note": "hand-authored example: a run that refuses at cost-model construction exits before a second heartbeat tick, which is what a watchdog should treat as 'stopped, not crashed' once it also observes status=failed rather than status=running.",
+  "monotonic_counter": 1,
+  "wall_clock_utc": "2026-09-13T09:05:00Z"
+}

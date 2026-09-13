@@ -1,0 +1,107 @@
+{
+  "_fixture_note": "HAND-AUTHORED EXAMPLE ARTIFACT for build order B1.4 \u2014 NOT produced by running bitbull's engine. Demonstrates the required shape for a cost-model construction refusal (work order B1.7 / acceptance criterion 6): 'a cost-unset run produces a complete run.json with status: failed and unset_parameters populated, and no metrics and no equity series.' This is the NORMAL state today per ema-crossover-btc-1h-rules-and-dashboard-v1 \u00a70 and bar-data-annex-v1 \u00a72 \u2014 every venue fee and several bar-mode parameters are unset pending the founder's venue decision, so a real run today would look exactly like this, not like the 'completed' fixture beside it.",
+  "schema_version": "1.0",
+  "run_id": "20260913T090500Z-fixture-failed-costmodel-ef56gh78",
+  "status": "failed",
+  "mode": "backtest",
+  "created_utc": "2026-09-13T09:05:00Z",
+  "finished_utc": "2026-09-13T09:05:00Z",
+  "engine_version": "unbuilt-fixture-example",
+  "failure": {
+    "stage": "cost_model_construction",
+    "message": "FillSimulator refused to construct: required bar-mode cost parameters are unset (bar-data-annex-v1 \u00a72). No net number can exist until these are set by the CFO/founder.",
+    "event_time": "2026-09-13T09:05:00Z"
+  },
+  "events_consumed": 0,
+  "decision_count": 0,
+  "termination_reason": "cost_model_construction_refused",
+  "code_dirty": false,
+  "data_snapshot_hash": "1e2f3a4b5c6d7e8f9012345678901234567890123456789012345678901234",
+  "data_source": {
+    "class": "synthetic_fixture",
+    "source": "synthetic_arithmetic_fixture_not_market_data",
+    "symbol": "BTC-USD-FIXTURE",
+    "venue_scope": "none - synthetic test fixture, not a mandated venue"
+  },
+  "cost_and_fill_model": {
+    "data_regime": "bar_ohlcv",
+    "spec_version": "cost-and-fill-model-v1+bar-data-annex-v1",
+    "bracket": null
+  },
+  "unset_parameters": [
+    "bar_fill.sigma_window_bars",
+    "bar_fill.sigma_floor_bps",
+    "bar_fill.participation.bar_participation_cap",
+    "bar_fill.spread_proxy.estimator",
+    "bar_fill.spread_proxy.citation",
+    "latency.latency_basis",
+    "latency.data_latency_ms",
+    "latency.submit_latency_ms",
+    "latency.cancel_latency_ms"
+  ],
+  "_unset_parameters_scope_note": "This list is the union of bar-data-annex-v1 \u00a72's explicit 'unset' entries and the latency parameters named in engine contract \u00a77 / annex \u00a76 ruling 4d \u2014 both specs this build read. It deliberately does NOT enumerate cost-and-fill-model-v1 \u00a72's venue fee fields, because that spec was outside this round's reading list; naming its field paths from memory would risk citing a venue detail never actually read. Flagged here rather than guessed.",
+  "manifest": {
+    "git_commit_sha": "0000000000000000000000000000000000fix2",
+    "dirty_diff_hash": null,
+    "lockfile_hash": "77aabbccddeeff00112233445566778899aabbccddeeff0011223344556677",
+    "python_version": "3.11.15",
+    "platform": "Linux-x86_64",
+    "data_snapshot_id": "fixture-btc-1h-synthetic-0001",
+    "data_snapshot_files": [
+      {
+        "path": "data/fixtures/btc_1h_synthetic_0001.csv",
+        "sha256": "1e2f3a4b5c6d7e8f9012345678901234567890123456789012345678901234",
+        "row_count": 8760
+      }
+    ],
+    "params": {
+      "strategy.fast_span": 9,
+      "strategy.slow_span": 20,
+      "strategy.ema_seed": "sma",
+      "strategy.sizing_pct": "0.25"
+    },
+    "params_hash": "9988776655443322110099887766554433221100998877665544332211aabb",
+    "rng_algorithm": "python_random_mt19937",
+    "rng_seed": 20260913,
+    "rng_draw_count_at_end": 0,
+    "engine_version": "unbuilt-fixture-example",
+    "cited_specs": [
+      {
+        "path": "specs/2026-09-13-ema-crossover-btc-1h-rules-and-dashboard-v1.md",
+        "sha256": "b017f94358c722a74d636b4404606dcfce4e941b5469b0261fe84b16314d30c9"
+      },
+      {
+        "path": "specs/2026-09-13-bar-data-backtest-annex-v1.md",
+        "sha256": "854ad287c42585f0729f3930ddaf2df53a57f87ebee398724d82172d080db2d4"
+      },
+      {
+        "path": "specs/2026-09-13-backtest-engine-contract-v1.md",
+        "sha256": "d89e4f54b7f9319ac9282dd299f49a036bf196ba5bded310bb5beed5f52be73b"
+      },
+      {
+        "path": "specs/2026-09-13-run-output-contract-v1.md",
+        "sha256": "6554eb3adb1ed111243907937f0b245764afca4d1a052ed793d54ddbb7eeaa0b"
+      }
+    ],
+    "risk_limits": {
+      "note": "RiskGate is build order B1.5, not implemented this round"
+    },
+    "risk_limits_hash": null,
+    "mode": "backtest",
+    "timezone": "UTC",
+    "events_consumed": 0,
+    "decision_count": 0,
+    "termination_reason": "cost_model_construction_refused",
+    "fit_window": null,
+    "parameter_configs_tried_count": 1
+  },
+  "warnings": [],
+  "params": {
+    "strategy.fast_span": 9,
+    "strategy.slow_span": 20,
+    "strategy.ema_seed": "sma",
+    "strategy.sizing_pct": "0.25"
+  },
+  "sweep_id": null,
+  "parent_run_id": null
+}

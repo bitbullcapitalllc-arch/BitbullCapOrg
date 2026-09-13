@@ -1,0 +1,91 @@
+{
+  "_fixture_note": "HAND-AUTHORED EXAMPLE ARTIFACT for build order B1.4 \u2014 NOT produced by running bitbull's engine (backtest/runner.py is not implemented until B1.5). This demonstrates the run-output-contract-v1 shape for status=running: written at start, before any metric exists, so a reader can distinguish 'in progress' from 'crashed' (run-output contract \u00a72 item 2). Every number below is an illustrative fixture value, not a measurement.",
+  "schema_version": "1.0",
+  "run_id": "20260913T090000Z-fixture-running-ab12cd34",
+  "status": "running",
+  "mode": "backtest",
+  "created_utc": "2026-09-13T09:00:00Z",
+  "finished_utc": null,
+  "engine_version": "unbuilt-fixture-example",
+  "failure": null,
+  "events_consumed": 812,
+  "decision_count": 6,
+  "termination_reason": null,
+  "code_dirty": true,
+  "data_snapshot_hash": "1e2f3a4b5c6d7e8f9012345678901234567890123456789012345678901234",
+  "data_source": {
+    "class": "synthetic_fixture",
+    "source": "synthetic_arithmetic_fixture_not_market_data",
+    "symbol": "BTC-USD-FIXTURE",
+    "venue_scope": "none - synthetic test fixture, not a mandated venue"
+  },
+  "cost_and_fill_model": {
+    "data_regime": "bar_ohlcv",
+    "spec_version": "cost-and-fill-model-v1+bar-data-annex-v1",
+    "bracket": null
+  },
+  "manifest": {
+    "git_commit_sha": "0000000000000000000000000000000000fix1",
+    "dirty_diff_hash": "a1b2c3d4e5f60000000000000000000000000000000000000000000000ab",
+    "lockfile_hash": "77aabbccddeeff00112233445566778899aabbccddeeff0011223344556677",
+    "python_version": "3.11.15",
+    "platform": "Linux-x86_64",
+    "data_snapshot_id": "fixture-btc-1h-synthetic-0001",
+    "data_snapshot_files": [
+      {
+        "path": "data/fixtures/btc_1h_synthetic_0001.csv",
+        "sha256": "1e2f3a4b5c6d7e8f9012345678901234567890123456789012345678901234",
+        "row_count": 8760
+      }
+    ],
+    "params": {
+      "strategy.fast_span": 9,
+      "strategy.slow_span": 20,
+      "strategy.ema_seed": "sma",
+      "strategy.sizing_pct": "0.25"
+    },
+    "params_hash": "9988776655443322110099887766554433221100998877665544332211aabb",
+    "rng_algorithm": "python_random_mt19937",
+    "rng_seed": 20260913,
+    "rng_draw_count_at_end": null,
+    "engine_version": "unbuilt-fixture-example",
+    "cited_specs": [
+      {
+        "path": "specs/2026-09-13-ema-crossover-btc-1h-rules-and-dashboard-v1.md",
+        "sha256": "b017f94358c722a74d636b4404606dcfce4e941b5469b0261fe84b16314d30c9"
+      },
+      {
+        "path": "specs/2026-09-13-bar-data-backtest-annex-v1.md",
+        "sha256": "854ad287c42585f0729f3930ddaf2df53a57f87ebee398724d82172d080db2d4"
+      },
+      {
+        "path": "specs/2026-09-13-backtest-engine-contract-v1.md",
+        "sha256": "d89e4f54b7f9319ac9282dd299f49a036bf196ba5bded310bb5beed5f52be73b"
+      },
+      {
+        "path": "specs/2026-09-13-run-output-contract-v1.md",
+        "sha256": "6554eb3adb1ed111243907937f0b245764afca4d1a052ed793d54ddbb7eeaa0b"
+      }
+    ],
+    "risk_limits": {
+      "note": "RiskGate is build order B1.5, not implemented this round; this fixture carries no real limits block"
+    },
+    "risk_limits_hash": null,
+    "mode": "backtest",
+    "timezone": "UTC",
+    "events_consumed": 812,
+    "decision_count": 6,
+    "termination_reason": null,
+    "fit_window": null,
+    "parameter_configs_tried_count": 1
+  },
+  "warnings": [],
+  "params": {
+    "strategy.fast_span": 9,
+    "strategy.slow_span": 20,
+    "strategy.ema_seed": "sma",
+    "strategy.sizing_pct": "0.25"
+  },
+  "sweep_id": null,
+  "parent_run_id": null
+}

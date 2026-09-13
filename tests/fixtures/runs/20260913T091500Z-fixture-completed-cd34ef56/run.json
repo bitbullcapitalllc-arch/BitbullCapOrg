@@ -1,0 +1,407 @@
+{
+  "_fixture_note": "HAND-AUTHORED EXAMPLE ARTIFACT for build order B1.4 \u2014 NOT produced by running bitbull's engine (backtest/runner.py, execution/fill.py are not implemented until B1.5/B1.6/B1.7). This demonstrates the run-output-contract-v1 + backtest-engine-contract-v1 + bar-data-annex-v1 SHAPE for status=completed so the frontend and QA have a concrete schema to build against before the engine exists. It is NOT a BTC result: data_source.class is synthetic_fixture and every number here is an illustrative fixture value, not a measurement \u2014 per firm rule 1 (no fabricated numbers), none of these values may ever be read as evidence about BTC. A real run today, with every cost parameter still unset, would look like the sibling 'failed-costmodel' fixture in this directory, not like this one \u2014 this one hypothesizes that a cost model was fully (if arbitrarily) parameterized, solely to exercise the completed-state schema.",
+  "_money_encoding_note": "Per run-output-contract-v1 \u00a75.6 item 2: money and quantity are never JSON floats. Metrics whose unit is 'currency' carry their value as a decimal STRING; ratio/fraction/bps/count/days/seconds metrics carry a JSON number, since those are not money or quantity.",
+  "schema_version": "1.0",
+  "run_id": "20260913T091500Z-fixture-completed-cd34ef56",
+  "status": "completed",
+  "mode": "backtest",
+  "created_utc": "2026-09-13T09:15:00Z",
+  "finished_utc": "2026-09-13T09:15:04Z",
+  "engine_version": "unbuilt-fixture-example",
+  "failure": null,
+  "events_consumed": 8760,
+  "decision_count": 41,
+  "termination_reason": "end_of_snapshot",
+  "code_dirty": false,
+  "data_snapshot_hash": "1e2f3a4b5c6d7e8f9012345678901234567890123456789012345678901234",
+  "data_source": {
+    "class": "synthetic_fixture",
+    "source": "synthetic_arithmetic_fixture_not_market_data",
+    "symbol": "BTC-USD-FIXTURE",
+    "venue_scope": "none - synthetic test fixture, not a mandated venue"
+  },
+  "rules_spec_version": "ema-crossover-btc-1h-v1",
+  "cost_and_fill_model": {
+    "data_regime": "bar_ohlcv",
+    "spec_version": "cost-and-fill-model-v1+bar-data-annex-v1",
+    "bracket": "base",
+    "bar_fill": {
+      "reference_price": "next_bar_open",
+      "k_bar_sweep": [
+        "0.25",
+        "0.5",
+        "1.0",
+        "2.0",
+        "4.0"
+      ],
+      "k_bar_used_this_run": "0.25",
+      "_bar_fill_note": "sigma_window_bars, sigma_floor_bps and bar_participation_cap are ILLUSTRATIVE FIXTURE PLACEHOLDER values for schema demonstration only \u2014 they are 'unset' in reality per bar-data-annex-v1 \u00a72 pending the CFO/analyst, and this fixture does not claim otherwise.",
+      "sigma_window_bars": 20,
+      "sigma_floor_bps": "5",
+      "participation": {
+        "bar_participation_cap": "0.02",
+        "alpha_bar": "0.5",
+        "volume_units_verified": false
+      },
+      "spread_proxy": {
+        "estimator": "unset",
+        "citation": "unset",
+        "reported_as_cost": false,
+        "_note": "stays unset per annex ruling 3d regardless of run completion; informational only, never gates construction and never added to cost"
+      }
+    },
+    "stop_resolution": {
+      "intrabar": "adverse_extreme_first",
+      "fill_basis": "min_of_stop_and_bar_open_for_long",
+      "emit_worst_case_diagnostic": true
+    },
+    "end_of_window": {
+      "mark": "final_bar_close",
+      "emit_terminal_sensitivity": true
+    }
+  },
+  "manifest": {
+    "git_commit_sha": "0000000000000000000000000000000000fix3",
+    "dirty_diff_hash": null,
+    "lockfile_hash": "77aabbccddeeff00112233445566778899aabbccddeeff0011223344556677",
+    "python_version": "3.11.15",
+    "platform": "Linux-x86_64",
+    "data_snapshot_id": "fixture-btc-1h-synthetic-0001",
+    "data_snapshot_files": [
+      {
+        "path": "data/fixtures/btc_1h_synthetic_0001.csv",
+        "sha256": "1e2f3a4b5c6d7e8f9012345678901234567890123456789012345678901234",
+        "row_count": 8760
+      }
+    ],
+    "params": {
+      "strategy.fast_span": 9,
+      "strategy.slow_span": 20,
+      "strategy.ema_seed": "sma",
+      "strategy.sizing_pct": "0.25",
+      "strategy.stop_type": "none",
+      "strategy.confirmation": "none",
+      "strategy.trend_filter": "none"
+    },
+    "params_hash": "9988776655443322110099887766554433221100998877665544332211aabb",
+    "rng_algorithm": "python_random_mt19937",
+    "rng_seed": 20260913,
+    "rng_draw_count_at_end": 0,
+    "engine_version": "unbuilt-fixture-example",
+    "cited_specs": [
+      {
+        "path": "specs/2026-09-13-ema-crossover-btc-1h-rules-and-dashboard-v1.md",
+        "sha256": "b017f94358c722a74d636b4404606dcfce4e941b5469b0261fe84b16314d30c9"
+      },
+      {
+        "path": "specs/2026-09-13-bar-data-backtest-annex-v1.md",
+        "sha256": "854ad287c42585f0729f3930ddaf2df53a57f87ebee398724d82172d080db2d4"
+      },
+      {
+        "path": "specs/2026-09-13-backtest-engine-contract-v1.md",
+        "sha256": "d89e4f54b7f9319ac9282dd299f49a036bf196ba5bded310bb5beed5f52be73b"
+      },
+      {
+        "path": "specs/2026-09-13-run-output-contract-v1.md",
+        "sha256": "6554eb3adb1ed111243907937f0b245764afca4d1a052ed793d54ddbb7eeaa0b"
+      }
+    ],
+    "risk_limits": {
+      "note": "RiskGate is build order B1.5, not implemented this round; this fixture carries no real limits block"
+    },
+    "risk_limits_hash": null,
+    "mode": "backtest",
+    "timezone": "UTC",
+    "events_consumed": 8760,
+    "decision_count": 41,
+    "termination_reason": "end_of_snapshot",
+    "fit_window": null,
+    "parameter_configs_tried_count": 1
+  },
+  "warnings": [
+    {
+      "code": "LATENCY_NOT_EXERCISED_IN_BAR_MODE",
+      "severity": "info",
+      "message": "latency parameters have no effect on the modelled fill price in bar mode; a populated latency field must never be read as an applied one (annex ruling 4d).",
+      "count": 1,
+      "first_event_time": "2026-09-13T09:15:00Z",
+      "last_event_time": "2026-09-13T09:15:04Z"
+    },
+    {
+      "code": "DATA_GAP",
+      "severity": "warn",
+      "message": "1 gap(s) detected in the fixture snapshot; bars are never interpolated. no-trade applied for the gap plus warmup_events bars after it.",
+      "count": 1,
+      "first_event_time": "2026-03-15T04:00:00Z",
+      "last_event_time": "2026-03-15T09:00:00Z"
+    }
+  ],
+  "metrics": {
+    "net_ann_sharpe": {
+      "value": 0.42,
+      "unit": "ratio",
+      "definition_spec": "specs/2026-09-13-ema-crossover-btc-1h-rules-and-dashboard-v1.md#6",
+      "n": 214,
+      "ci_low": -1.31,
+      "ci_high": 2.09,
+      "note": "illustrative only; read as noise at one standard error per spec \u00a70"
+    },
+    "gross_pnl_total": {
+      "value": "18250.4200",
+      "unit": "currency",
+      "definition_spec": "specs/2026-09-13-ema-crossover-btc-1h-rules-and-dashboard-v1.md#6"
+    },
+    "net_pnl_total": {
+      "value": "6021.8800",
+      "unit": "currency",
+      "definition_spec": "specs/2026-09-13-ema-crossover-btc-1h-rules-and-dashboard-v1.md#6"
+    },
+    "cost_ratio": {
+      "value": 0.33,
+      "unit": "ratio",
+      "definition_spec": "specs/2026-09-13-ema-crossover-btc-1h-rules-and-dashboard-v1.md#6"
+    },
+    "max_drawdown": {
+      "value": -0.184,
+      "unit": "fraction",
+      "definition_spec": "specs/2026-09-13-ema-crossover-btc-1h-rules-and-dashboard-v1.md#6"
+    },
+    "exposure": {
+      "value": 0.57,
+      "unit": "fraction",
+      "definition_spec": "specs/2026-09-13-ema-crossover-btc-1h-rules-and-dashboard-v1.md#6"
+    },
+    "turnover": {
+      "value": 3.1,
+      "unit": "ratio",
+      "definition_spec": "specs/2026-09-13-ema-crossover-btc-1h-rules-and-dashboard-v1.md#6"
+    },
+    "trade_count": {
+      "value": 214,
+      "unit": "count",
+      "definition_spec": "specs/2026-09-13-ema-crossover-btc-1h-rules-and-dashboard-v1.md#6"
+    },
+    "break_even_k_bar": {
+      "value": 1.35,
+      "unit": "ratio",
+      "definition_spec": "specs/2026-09-13-bar-data-backtest-annex-v1.md#3"
+    },
+    "break_even_round_trip_bps": {
+      "value": 18.2,
+      "unit": "bps",
+      "definition_spec": "specs/2026-09-13-bar-data-backtest-annex-v1.md#3"
+    },
+    "penalty_outside_bar_range_count": {
+      "value": 3,
+      "unit": "count",
+      "definition_spec": "specs/2026-09-13-bar-data-backtest-annex-v1.md#3"
+    },
+    "penalty_outside_bar_range_worst_bps": {
+      "value": 7.4,
+      "unit": "bps",
+      "definition_spec": "specs/2026-09-13-bar-data-backtest-annex-v1.md#3"
+    },
+    "worst_case_stop_fill_price": {
+      "value": null,
+      "unit": "currency",
+      "reason_code": "NO_STOP_ENABLED_THIS_CONFIG",
+      "definition_spec": "specs/2026-09-13-bar-data-backtest-annex-v1.md#7"
+    },
+    "bar_reference_component": {
+      "value": "412.10",
+      "unit": "currency",
+      "definition_spec": "specs/2026-09-13-bar-data-backtest-annex-v1.md#3"
+    },
+    "bar_penalty_component": {
+      "value": "-198.55",
+      "unit": "currency",
+      "definition_spec": "specs/2026-09-13-bar-data-backtest-annex-v1.md#3"
+    },
+    "tick_rounding_component": {
+      "value": "-2.03",
+      "unit": "currency",
+      "definition_spec": "specs/2026-09-13-bar-data-backtest-annex-v1.md#3"
+    },
+    "half_spread_component": {
+      "value": null,
+      "unit": "currency",
+      "reason_code": "NO_QUOTE_DATA_IN_DATASET",
+      "definition_spec": "specs/2026-09-13-bar-data-backtest-annex-v1.md#5"
+    },
+    "latency_component": {
+      "value": null,
+      "unit": "currency",
+      "reason_code": "NO_QUOTE_DATA_IN_DATASET",
+      "definition_spec": "specs/2026-09-13-bar-data-backtest-annex-v1.md#6"
+    },
+    "book_walk_component": {
+      "value": null,
+      "unit": "currency",
+      "reason_code": "NO_DEPTH_IN_DATASET",
+      "definition_spec": "specs/2026-09-13-bar-data-backtest-annex-v1.md#6"
+    },
+    "residual_impact_component": {
+      "value": null,
+      "unit": "currency",
+      "reason_code": "NO_DEPTH_IN_DATASET",
+      "definition_spec": "specs/2026-09-13-bar-data-backtest-annex-v1.md#6"
+    },
+    "spread_proxy_bps": {
+      "value": null,
+      "unit": "bps",
+      "reason_code": "SPREAD_PROXY_NOT_IMPLEMENTED",
+      "definition_spec": "specs/2026-09-13-bar-data-backtest-annex-v1.md#5",
+      "tag": "PROXY_NOT_MEASURED_SPREAD",
+      "reported_as_cost": false
+    }
+  },
+  "capacity_estimate": {
+    "value": null,
+    "unit": null,
+    "reason_code": "NOT_ESTIMABLE_FROM_BAR_DATA",
+    "definition_spec": "specs/2026-09-13-bar-data-backtest-annex-v1.md#6"
+  },
+  "assumed_size_regime": "infinitesimal_relative_to_unobserved_depth",
+  "indeterminate_intrabar_path": false,
+  "terminal_trade_sensitivity": {
+    "terminal_trade_notional": "2500.00",
+    "terminal_trade_unrealized_pnl": "134.20",
+    "net_ann_sharpe_excluding_terminal_trade": {
+      "value": 0.39,
+      "unit": "ratio"
+    },
+    "gate_outcome_changed": false,
+    "_note": "illustrative fixture value; recomputation logic is build order B1.8, not implemented this round"
+  },
+  "series": {
+    "equity": {
+      "first_event_time": "2026-01-01T01:00:00Z",
+      "last_event_time": "2026-12-30T23:00:00Z",
+      "row_count": 5,
+      "columns": [
+        {
+          "name": "seq",
+          "unit": "count"
+        },
+        {
+          "name": "event_time",
+          "unit": "timestamp"
+        },
+        {
+          "name": "equity_minor",
+          "unit": "currency",
+          "scale": 8
+        }
+      ]
+    },
+    "orders": {
+      "first_event_time": "2026-01-05T02:00:00Z",
+      "last_event_time": "2026-12-29T14:00:00Z",
+      "row_count": 3,
+      "columns": [
+        {
+          "name": "intent_id",
+          "unit": "id"
+        },
+        {
+          "name": "order_id",
+          "unit": "id"
+        },
+        {
+          "name": "event_time",
+          "unit": "timestamp"
+        },
+        {
+          "name": "seq",
+          "unit": "count"
+        },
+        {
+          "name": "status",
+          "unit": "enum"
+        },
+        {
+          "name": "reason_code",
+          "unit": "enum"
+        },
+        {
+          "name": "qty_minor",
+          "unit": "quantity",
+          "scale": 8
+        },
+        {
+          "name": "side",
+          "unit": "enum"
+        }
+      ]
+    },
+    "fills": {
+      "first_event_time": "2026-01-05T03:00:00Z",
+      "last_event_time": "2026-12-29T15:00:00Z",
+      "row_count": 2,
+      "columns": [
+        {
+          "name": "fill_id",
+          "unit": "id"
+        },
+        {
+          "name": "order_id",
+          "unit": "id"
+        },
+        {
+          "name": "event_time",
+          "unit": "timestamp"
+        },
+        {
+          "name": "seq",
+          "unit": "count"
+        },
+        {
+          "name": "price_minor",
+          "unit": "currency",
+          "scale": 8
+        },
+        {
+          "name": "qty_minor",
+          "unit": "quantity",
+          "scale": 8
+        }
+      ]
+    },
+    "trades": {
+      "first_event_time": "2026-01-05T03:00:00Z",
+      "last_event_time": "2026-12-29T15:00:00Z",
+      "row_count": 1,
+      "columns": [
+        {
+          "name": "trade_id",
+          "unit": "id"
+        },
+        {
+          "name": "fill_ids",
+          "unit": "id_list"
+        },
+        {
+          "name": "entry_event_time",
+          "unit": "timestamp"
+        },
+        {
+          "name": "exit_event_time",
+          "unit": "timestamp"
+        },
+        {
+          "name": "net_pnl_minor",
+          "unit": "currency",
+          "scale": 8
+        }
+      ]
+    }
+  },
+  "params": {
+    "strategy.fast_span": 9,
+    "strategy.slow_span": 20,
+    "strategy.ema_seed": "sma",
+    "strategy.sizing_pct": "0.25"
+  },
+  "sweep_id": "20260913T091500Z-fixture-sweep-aa11bb22",
+  "parent_run_id": null
+}
