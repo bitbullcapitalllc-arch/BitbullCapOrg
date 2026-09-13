@@ -51,4 +51,5 @@ Nobody reports a synthetic result as a real one. A dashboard showing synthetic d
 
 | Stage | Dispatched | Returned | Outcome |
 |---|---|---|---|
-| 1 CEO → CFO mandate | 2026-09-13 | — | — |
+| 1 CEO → CFO mandate | 2026-09-13 | 2026-09-13 | Analyst work order written; 9 bindings on "best returns" (holdout touchable 3 times, ever); found 1h bars cannot support an aggressive entry under the published spec — bar-data annex to follow |
+| 2 CFO → analyst (CEO couriered) | 2026-09-13 | — | — |
