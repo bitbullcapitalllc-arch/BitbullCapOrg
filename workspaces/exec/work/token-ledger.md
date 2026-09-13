@@ -36,6 +36,8 @@ Changes in effect from this point: sub-agents on Sonnet (`cost-optimizer` on Hai
 | 2026-09-13 | `cto` | Review round: backend plan, QA criteria, frontend contract; 2 specs published | opus | **107,509** | 90,913 baseline — **up 18%** |
 | 2026-09-13 | `cfo` | EMA initiative stage 1: analyst work order, overfitting ruling, dashboard asks | opus | **69,851** | 94,345 baseline — **down 26%** |
 | 2026-09-13 | `market-analyst` | EMA rules, pre-registration, null procedure | **sonnet** | **93,166** | ~90k sub-agent baseline — **flat on token count** |
+| 2026-09-13 | `cfo` | Stages 4-6: review, bar-data annex, approval-request, CTO handoff | opus | **95,879** | 94,345 baseline — flat; published 2 specs |
+| 2026-09-13 | `cto` | Stage 7: 3 work orders, build plan, 1 spec, 9 asks answered | opus | **unmeasured** | Died on the session limit before reporting — recorded as unmeasured, not estimated |
 
 The CFO logged this as a zero-dispatch round from inside its own session, which is correct from where it sits: it dispatched nothing. But the CEO dispatched *it*, and that cost 92,661 tokens. Both rows belong here. **An agent cannot measure its own invocation — only the dispatcher can**, so the dispatcher records it.
 
