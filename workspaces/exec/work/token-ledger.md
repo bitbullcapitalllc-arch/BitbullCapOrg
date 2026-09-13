@@ -34,6 +34,7 @@ Changes in effect from this point: sub-agents on Sonnet (`cost-optimizer` on Hai
 | 2026-09-13 | `cfo` | Review round: cost/fill model, data requirements, trader report | opus | **92,661** | 94,345 baseline — essentially flat |
 | 2026-09-13 | `cto` | Review round: backend plan, QA criteria, frontend contract; 2 specs published | opus | **107,509** | 90,913 baseline — **up 18%** |
 | 2026-09-13 | `cfo` | EMA initiative stage 1: analyst work order, overfitting ruling, dashboard asks | opus | **69,851** | 94,345 baseline — **down 26%** |
+| 2026-09-13 | `market-analyst` | EMA rules, pre-registration, null procedure | **sonnet** | **93,166** | ~90k sub-agent baseline — **flat on token count** |
 
 The CFO logged this as a zero-dispatch round from inside its own session, which is correct from where it sits: it dispatched nothing. But the CEO dispatched *it*, and that cost 92,661 tokens. Both rows belong here. **An agent cannot measure its own invocation — only the dispatcher can**, so the dispatcher records it.
 
@@ -81,3 +82,17 @@ The CFO's stage-1 dispatch cost **69,851 tokens against its own 92,661 the round
 That isolates the lever reasonably well. The CTO round went *up* 18% because it published two specs; the CFO round came *down* 26% on a tighter brief. So the cost tracks **how much the agent must read and write**, which is what a work order controls. Naming the reading list is therefore not a nicety — it is the knob.
 
 Model tiering is still unmeasured. The `market-analyst` dispatch now running is the first Sonnet sub-agent; its number is the one to watch.
+
+### Third measured finding — and a correction to this ledger's premise
+
+The first Sonnet sub-agent cost **93,166 tokens, flat against the ~90k Opus sub-agent baseline.** Tiering did not reduce the token count, and on reflection it was never going to: **token count measures how much work was done, not what the work cost.** The same 93,166 tokens on Sonnet carry a much lower price and a much lower weight against a session usage limit than on Opus — which is the thing the founder actually hit.
+
+So this ledger was measuring the wrong unit for that lever, and the earlier expectation recorded above ("the real test is the next round of sub-agent work") was framed wrongly. Corrected framing, which is how the three levers should be read from now on:
+
+| Lever | What it moves | Evidence |
+|---|---|---|
+| **Model tiering** | Price and quota weight **per token**, not token count | Analyst: 93,166 tokens on Sonnet vs ~90k on Opus — same volume, cheaper tokens |
+| **Tighter work orders** | **Token count** | CFO: 69,851 vs 94,345, down 26%, same agent and model |
+| **Fewer dispatches** | Number of invocations | 2 reviews replaced 4 re-runs |
+
+Two of the three are now measured in the unit they actually move. Tiering's saving is real but will never appear in this column — it appears on the bill and in the session limit. Nobody should claim a token-count reduction from it, and nobody should conclude from a flat token count that it did not work.
