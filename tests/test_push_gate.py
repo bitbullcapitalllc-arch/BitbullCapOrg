@@ -65,12 +65,22 @@ class GateCase(unittest.TestCase):
         self.git("commit", "-q", "-m", msg)
         return self.git("rev-parse", "HEAD")
 
-    def gate(self, tip=None, ref=f"refs/heads/{BRANCH}", remote="origin"):
+    def gate(self, tip=None, ref=f"refs/heads/{BRANCH}", remote="origin", remote_sha=None):
         tip = tip or self.git("rev-parse", "HEAD")
-        p = subprocess.run([sys.executable, str(SCRIPT), "--repo", str(self.repo), "--tip", tip,
-                            "--ref", ref, "--remote", remote], capture_output=True, text=True,
-                           encoding="utf-8")
-        return p
+        cmd = [sys.executable, str(SCRIPT), "--repo", str(self.repo), "--tip", tip,
+               "--ref", ref, "--remote", remote]
+        if remote_sha:
+            cmd += ["--remote-sha", remote_sha]
+        return subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
+
+    def commit_special(self, rel, mode, content, msg):
+        """Commit a path with an exact git mode (e.g. 120000 symlink) without needing the
+        filesystem to support it. Used to craft paths a Windows checkout cannot easily make."""
+        blob = subprocess.run(["git", "-C", str(self.repo), "hash-object", "-w", "--stdin"],
+                              input=content, capture_output=True, text=True, encoding="utf-8").stdout.strip()
+        self.git("update-index", "--add", "--cacheinfo", f"{mode},{blob},{rel}")
+        self.git("commit", "-q", "-m", msg)
+        return self.git("rev-parse", "HEAD")
 
     def approve(self, approved=None, name="2026-09-20-push-test.md", **over):
         return self.commit({f"governance/approvals/{name}": record(approved or self.a, **over)},
@@ -194,6 +204,112 @@ class TestApprovedCommitBinding(GateCase):
         self.assertAllowed(self.gate())
 
 
+class TestNothingHidesInsideTheApprovalsExemption(GateCase):
+    """QA's first run found that `git diff` with rename detection reported
+    `D src/x.py` + `A governance/approvals/x.txt` as one harmless rename into the exempt
+    directory, so code could be deleted after QA verified it. These are the regressions."""
+
+    def setUp(self):
+        super().setUp()
+        self.a = self.commit({"backtest-bot/src/risk_limits.py": "LIMIT = 1\n"}, "risk code")
+        self.approve()
+
+    def test_rename_of_code_into_approvals_is_blocked(self):
+        """The bypass QA found, exactly: move a source file into governance/approvals/."""
+        self.git("mv", "backtest-bot/src/risk_limits.py", "governance/approvals/risk_limits.txt")
+        self.git("commit", "-q", "-m", "rename into approvals")
+        self.assertBlocked(self.gate(), "AFTER the commit QA verified", "backtest-bot/src/risk_limits.py (D)")
+
+    def test_rename_into_a_md_file_in_approvals_is_blocked_too(self):
+        self.git("mv", "backtest-bot/src/risk_limits.py", "governance/approvals/risk_limits.md")
+        self.git("commit", "-q", "-m", "rename to md")
+        self.assertBlocked(self.gate(), "backtest-bot/src/risk_limits.py (D)")
+
+    def test_rename_plus_an_edit_is_blocked(self):
+        """With similarity detection on, a rename with a small edit is still a rename."""
+        self.git("mv", "backtest-bot/src/risk_limits.py", "governance/approvals/risk_limits.txt")
+        (self.repo / "governance/approvals/risk_limits.txt").write_text("LIMIT = 999\n", encoding="utf-8")
+        self.git("add", "-A")
+        self.git("commit", "-q", "-m", "rename and neuter")
+        self.assertBlocked(self.gate(), "backtest-bot/src/risk_limits.py (D)")
+
+    def test_plain_deletion_is_blocked(self):
+        self.git("rm", "-q", "backtest-bot/src/risk_limits.py")
+        self.git("commit", "-q", "-m", "delete")
+        self.assertBlocked(self.gate(), "backtest-bot/src/risk_limits.py (D)")
+
+    def test_non_markdown_file_under_approvals_is_blocked(self):
+        self.commit({"governance/approvals/payload.py": "print('hi')\n"}, "code in approvals")
+        self.assertBlocked(self.gate(), "governance/approvals/payload.py (A)")
+
+    def test_symlink_under_approvals_is_blocked(self):
+        self.commit_special("governance/approvals/link.md", "120000", "../../backtest-bot/src/risk_limits.py",
+                            "symlink")
+        self.assertBlocked(self.gate(), "governance/approvals/link.md (A)")
+
+    def test_executable_mode_under_approvals_is_blocked(self):
+        self.commit_special("governance/approvals/run.md", "100755", "#!/bin/sh\n", "exec bit")
+        self.assertBlocked(self.gate(), "governance/approvals/run.md (A)")
+
+    def test_a_plain_added_markdown_note_under_approvals_is_still_fine(self):
+        self.commit({"governance/approvals/2026-09-20-note.md": "note\n"}, "note")
+        self.assertAllowed(self.gate())
+
+    def test_modifying_an_existing_approvals_markdown_file_is_fine(self):
+        self.commit({"governance/approvals/2026-09-20-push-test.md": record(self.a) + "\nextra line\n"},
+                    "amend record body")
+        self.assertAllowed(self.gate())
+
+
+class TestDuplicateKeys(GateCase):
+    def test_held_then_approved_is_blocked(self):
+        """Last-one-wins would let a HELD be overridden by a later APPROVED line."""
+        text = record(self.a, cto_decision="HELD").replace(
+            "cto_decision: HELD\n", "cto_decision: HELD\ncto_decision: APPROVED\n")
+        self.commit({"governance/approvals/2026-09-20-push-test.md": text}, "dup")
+        self.assertBlocked(self.gate(), "duplicate key `cto_decision`")
+
+    def test_approved_then_held_is_blocked_too(self):
+        text = record(self.a).replace("cto_decision: APPROVED\n", "cto_decision: APPROVED\ncto_decision: HELD\n")
+        self.commit({"governance/approvals/2026-09-20-push-test.md": text}, "dup")
+        self.assertBlocked(self.gate(), "duplicate key")
+
+    def test_duplicated_qa_verdict_is_blocked(self):
+        text = record(self.a).replace("qa_verdict: PASS\n", "qa_verdict: FAIL\nqa_verdict: PASS\n")
+        self.commit({"governance/approvals/2026-09-20-push-test.md": text}, "dup")
+        self.assertBlocked(self.gate(), "duplicate key `qa_verdict`")
+
+
+class TestForcePushIsRefused(GateCase):
+    """QA's first run also found a force-push with a fresh valid record was allowed, because
+    the hook ignored the remote's current commit."""
+
+    def test_fast_forward_of_the_remote_is_allowed(self):
+        self.approve()
+        self.assertAllowed(self.gate(remote_sha=self.a))
+
+    def test_first_push_of_a_new_branch_is_allowed(self):
+        self.approve()
+        self.assertAllowed(self.gate(remote_sha="0" * 40))
+
+    def test_rewriting_history_the_remote_already_has_is_blocked(self):
+        # The remote has a commit that is NOT an ancestor of what we push: a force-push.
+        self.git("checkout", "-q", "-b", "remote-history", self.a)
+        remote_tip = self.commit({"src/other.py": "z = 1\n"}, "commit the remote has")
+        self.git("checkout", "-q", BRANCH)
+        self.approve()
+        self.assertBlocked(self.gate(remote_sha=remote_tip), "not a fast-forward", "force-push")
+
+    def test_pushing_the_same_commit_again_is_a_no_op_fast_forward(self):
+        self.approve()
+        tip = self.git("rev-parse", "HEAD")
+        self.assertAllowed(self.gate(remote_sha=tip))
+
+    def test_remote_commit_this_clone_does_not_have_is_blocked(self):
+        self.approve()
+        self.assertBlocked(self.gate(remote_sha="d" * 40), "does not have", "fetch first")
+
+
 class TestFailClosed(GateCase):
     def test_malformed_front_matter_blocks(self):
         self.commit({"governance/approvals/2026-09-20-push-test.md": "no front matter here\n"}, "bad")
@@ -247,6 +363,15 @@ class TestHookScript(GateCase):
         self.approve()
         p = self.run_hook(self.git("rev-parse", "HEAD"))
         self.assertEqual(p.returncode, 0, p.stderr)
+
+    def test_hook_reads_the_remote_sha_from_stdin_and_refuses_a_force_push(self):
+        self.git("checkout", "-q", "-b", "remote-history", self.a)
+        remote_tip = self.commit({"src/other.py": "z = 1\n"}, "commit the remote has")
+        self.git("checkout", "-q", BRANCH)
+        self.approve()
+        p = self.run_hook(self.git("rev-parse", "HEAD"), remote_sha=remote_tip)
+        self.assertEqual(p.returncode, 1, p.stderr)
+        self.assertIn("force-push", p.stderr)
 
     def test_hook_with_nothing_to_push_is_a_no_op(self):
         p = subprocess.run([sys.executable, str(SCRIPT), "--hook", "origin", "u", "--repo", str(self.repo)],

@@ -89,7 +89,7 @@ git rev-parse HEAD                            # record it in the verdict
 |---|---|---|
 | Bot | 6 — `test_import_graph` (2), `test_no_float_money` (4) | The data loader was never committed. **Removed from this list the moment the loader lands** |
 | Org tooling | 8 — `TestS3FrontmatterParsing` (4), `TestGitignoredPaths` (2: `include_ignored_*`), `TestExistingBehaviourPreserved` (2) | Unfinished `msg.py` migration (6); ignored-path audit lists a collapsed directory (2) |
-| Push gate | 0 — all 33 tests in `tests/test_push_gate.py` must pass | — |
+| Push gate | 0 — all 51 tests in `tests/test_push_gate.py` must pass | — |
 
 **Verdict** — one of: `PASS`, `PASS WITH NOTED RISK` (each risk named), `FAIL`, or `COULD NOT VERIFY` (say which check could not be run and why). Pressure and deadlines do not change the verdict; only evidence does. No `PASS` with an open blocker, a failing test outside the known set, or a check that was not executed.
 
