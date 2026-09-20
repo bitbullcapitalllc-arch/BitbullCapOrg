@@ -46,6 +46,17 @@ Start a session in this repo and talk to it as the founder. The session acts as 
 
 Address a role directly when you want just that function.
 
+## Picking this up in a new session?
+
+**Read [`HANDOFF.md`](HANDOFF.md).** It is the complete onboarding for a human or an AI taking the orchestrator role: current state, the two open blockers, the approved next steps, environment facts that would otherwise take hours to rediscover, and how to run it locally. `CLAUDE.md` carries the standing instructions and loads automatically.
+
+```bash
+git clone https://github.com/bitbullcapitalllc-arch/BitbullCapOrg.git
+cd BitbullCapOrg && git checkout claude/bitbull-capital-org-structure-eiiv8c
+uv sync --frozen && uv run --frozen pytest -q      # 148 passed, 8 known-red
+uv run --frozen python -m bitbull.ui.dash_cli tests/fixtures/runs /tmp/dashout
+```
+
 ## Workspaces and communication
 
 Each agent works in a bounded room, and can only talk to the roles it shares a room with:

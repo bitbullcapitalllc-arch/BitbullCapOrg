@@ -17,6 +17,15 @@ Append-only. One entry per decision that commits money, is hard to reverse, or t
 
 ---
 
+### 2026-09-20 — Write the handoff, and put the instructions back into CLAUDE.md
+- **Decision:** Create `HANDOFF.md` as the complete onboarding document for anyone — human or AI — taking the orchestrator role in a new session, and restore the standing instructions into `CLAUDE.md` so it stands alone as the auto-loaded file.
+- **Rationale:** The founder is moving this session to their local machine. A successor should not have to read thirty files and re-derive the environment's constraints. `HANDOFF.md` carries measured state, the two blockers, the approved next-step plan, and the hard-won environment knowledge — egress blocked, Alpha Vantage crypto-intraday premium, GitHub reachable but search blocked, sub-agents lacking the Agent and MCP tools, session limits killing agents mid-task and the save-to-disk habit that makes recovery work.
+- **Reverses part of the 2026-09-13 token optimization, deliberately.** `CLAUDE.md` had been slimmed to 73 lines with the rules moved to `.claude/foundation.md`. Only `CLAUDE.md` is auto-loaded, so on a fresh machine that slimming trades reliability for roughly 2-3k tokens a session. With the founder switching machines, reliability wins. The cost is stated rather than hidden, and `foundation.md` remains the shared deeper text.
+- **Alternatives considered:** Pointing at `foundation.md` from `CLAUDE.md` and leaving it slim (rejected — a read instruction is weaker than auto-loaded text, and this failed once already when the rules were moved somewhere nothing read them); putting the handoff in the README (rejected — the README is for a reader deciding what this repo is, the handoff is for someone about to operate it).
+- **Approved by:** Founder (requested both) → CEO
+- **Record:** `HANDOFF.md`
+- **What would reverse this:** `HANDOFF.md` going stale. It states measured facts at a named commit, so whoever changes that state updates §6-§8 in the same change.
+
 ### 2026-09-13 — EMA crossover strategy spec approved; one year of 1h data cannot prove an edge
 - **Decision:** CEO approval of the EMA crossover rules and dashboard spec, completing the gate the founder set (analyst → CFO → CEO, no founder signature). Approved: `specs/2026-09-13-ema-crossover-btc-1h-rules-and-dashboard-v1.md`, `specs/2026-09-13-bar-data-backtest-annex-v1.md`, the two-tier grid, the paired block bootstrap, and gate 2 narrowed to a single pre-declared out-of-sample candidate.
 - **What was approved is a specification and a protocol.** No BTC data exists in this firm, no backtest has been run, and no result about real BTC is implied.
