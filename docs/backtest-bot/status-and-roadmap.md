@@ -26,7 +26,8 @@ Baseline on the original single-tree layout, and again after separating the org 
 |---|---|---|---|---|
 | Bot | `cd backtest-bot && uv run --frozen pytest -q` | 55 | 6 | All six need the missing loader: 2 in `test_import_graph.py`, 4 in `test_no_float_money.py` |
 | Org tooling | `python -m pytest tests/test_tooling.py -q` | 43 | 8 | Six are the unfinished `msg.py` work per the handoff (4 frontmatter-parsing, 2 message-creation). **Two are a separate defect found while checking:** the boundary audit's `--include-ignored` reports the collapsed directory `backtest-bot/data/` instead of the file inside it (observed output), so the two ignored-path tests fail. Known; expected; **no new failures** |
-| **Total** | | **98** | **14** | Identical before and after the restructure: **no new red** |
+| Push gate (added later, same day) | `python -m pytest tests/test_push_gate.py -q` | 33 | 0 | — |
+| **Total** | | **131** | **14** | The 98 / 14 figure was identical before and after the restructure (**no new red**); the push-gate suite added 33 passing tests |
 
 The handoff reported "148 passed, 8 failed". That does not reproduce from a fresh clone, because the previous check ran in a working tree that still contained the loader and its tests.
 

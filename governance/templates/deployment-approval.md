@@ -41,6 +41,13 @@
 
 **No sign-off with an open blocker, a failing or skipped test, an untested risk control, or no rollback path.**
 
+## 4b. Push to the remote
+
+> Pushing the change to GitHub is its own gate, separate from deployment: `governance/policies/push-checklist.md` and a push-approval record (`governance/templates/push-approval.md`) signed by QA and the CTO. Record its id here.
+
+- **Push-approval record id:**
+- **Pushed commit (verified equal to the remote tip):**
+
 ## 5. Post-deployment
 
 - **Verified working in target:**

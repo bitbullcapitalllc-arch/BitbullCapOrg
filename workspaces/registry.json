@@ -282,6 +282,9 @@
     ],
     "workspaces/*/README.md": [
       "ceo"
+    ],
+    ".githooks/**": [
+      "cto"
     ]
   },
   "message_types": [

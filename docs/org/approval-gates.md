@@ -1,10 +1,10 @@
 # Approval Gates
 
-Who may authorize what, and how it is recorded. The authoritative text is [`governance/approval-policy.md`](../../governance/approval-policy.md); this page shows the shape of it.
+Who may authorize what, and how it is recorded. Four gates guard capital and commitments; a fifth guards the repository (every push). The authoritative text is [`governance/approval-policy.md`](../../governance/approval-policy.md); this page shows the shape of it.
 
 **The founder signs last, always.** No agent signs for the founder, infers their approval, or treats silence as approval. An approval exists only as a record in `governance/approvals/` — conversational agreement is not an approval. Halting never needs approval: stopping is always allowed, starting is what is gated.
 
-## The four gates
+## The four capital gates
 
 ```mermaid
 flowchart LR
@@ -34,6 +34,31 @@ flowchart LR
 | 4 Capital / budget | Trading capital allocation, recurring cost commitments, anything that moves burn or runway | CFO, who states the runway impact in months |
 
 Changing a strategy's logic, parameters or limits is an **amendment** and re-enters the same chain. It is never a verbal adjustment.
+
+## The push gate — a fifth gate, for the repository itself
+
+Every push to GitHub, of any size, passes a gate that has nothing to do with capital and everything to do with what ends up in the shared record. Founder's rule, 2026-09-20: **no push without the CTO's written approval, and the CTO approves only after confirming with the tester.**
+
+```mermaid
+flowchart LR
+    A["Author<br/>completes checklist section A<br/>commits locally"] --> Q["qa-tester<br/>verifies from a FRESH CLONE<br/>of the exact commit"]
+    Q -- "FAIL or COULD NOT VERIFY" --> H["Back to the author"]
+    Q -- "PASS or PASS WITH NOTED RISK<br/>with real command output" --> C["CTO<br/>reads the evidence and the diff"]
+    C -- "HELD" --> H
+    C -- "APPROVED" --> R["Push-approval record<br/>names the verified commit<br/>committed in an approvals-only commit"]
+    R --> P["git push"]
+    P --> HK{"pre-push hook<br/>valid record for the tip?"}
+    HK -- no --> X(["BLOCKED"])
+    HK -- yes --> G(["GitHub<br/>then verify remote tip equals approved tip"])
+```
+
+| | |
+|---|---|
+| Checklist | [`governance/policies/push-checklist.md`](../../governance/policies/push-checklist.md) |
+| Record | `governance/templates/push-approval.md` to `governance/approvals/YYYY-MM-DD-push-<slug>.md` |
+| Enforcement | `.githooks/pre-push` calls `scripts/check_push_approval.py`. Install once per clone: `git config core.hooksPath .githooks` |
+| Fail-closed cases | No record, malformed record, QA not `PASS`/`PASS WITH NOTED RISK`, CTO not `APPROVED`, any change after the verified commit outside `governance/approvals/`, ref deletion, tag push |
+| Not covered | `--no-verify`, a clone without the hook, pushes through API connectors. **Branch protection on GitHub is the only complete control** |
 
 ## What the trader checks itself
 
@@ -83,12 +108,12 @@ Approved on 2026-09-13 (see `governance/decision-log.md`). It authorizes a **spe
 |---|---|
 | CEO | Planning, task assignment, priorities, internal process |
 | CFO | Research mandates, analysis, sending a strategy back, recommending limits |
-| CTO | Technical design within agreed cost, task breakdown, paper-environment deploys |
+| CTO | Technical design within agreed cost, task breakdown, paper-environment deploys, **approving a push to GitHub after QA's verification** |
 | CLO | Legal analysis and positions, drafting, identifying required controls |
 | market-analyst | Research direction and methodology within its mandate |
 | trader | **Halting.** Nothing else |
 | developers | Implementation detail within the assigned task and agreed architecture |
-| qa-tester | Test strategy, severity calls, the release verdict |
+| qa-tester | Test strategy, severity calls, the release verdict, the pre-push verification verdict |
 
 ## Refusal is mandatory
 

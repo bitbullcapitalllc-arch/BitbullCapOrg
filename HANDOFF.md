@@ -2,7 +2,7 @@
 
 **You are picking up the orchestrator role at Bitbull Capital.** This document is everything you need. You should not have to read thirty files to start; read this one, then open only what your task names.
 
-**Audience:** both a human and an AI model. Written 2026-09-20, at commit `6427368` on branch `claude/bitbull-capital-org-structure-eiiv8c`.
+**Audience:** both a human and an AI model. First written 2026-09-20 at commit `6427368`; updated the same day after the org/bot separation and the addition of the push gate (§13). Branch `claude/bitbull-capital-org-structure-eiiv8c`. Run `git log` for the current commit — this file deliberately does not hard-code one, because it goes stale the moment it is committed.
 
 ---
 
@@ -106,6 +106,7 @@ The founder signs last, always.
 | Production deployment | QA PASS → CTO → CEO → **FOUNDER** |
 | Binding commitments | CLO → CEO → **FOUNDER** |
 | Capital / budget | CFO → CEO → **FOUNDER** |
+| **Push to GitHub** (any branch) | QA verifies → **CTO approves** → push. No push without it — §13 |
 
 Exception the founder granted explicitly for the current initiative: **strategy-rule approval is analyst → CFO → CEO only, no founder signature.** The finished system still gets their final review.
 
@@ -125,6 +126,8 @@ workspaces/            The rooms: exec, finance, engineering, legal, founder + r
   */work/              Working notes, assessments, build logs
 scripts/msg.py         Messaging (send, reply, inbox, routes, close)
 scripts/check_boundaries.py   Boundary audit
+scripts/check_push_approval.py + .githooks/pre-push   The push gate (§13)
+governance/policies/push-checklist.md   What must be updated and reviewed before EVERY push
 tests/                 Tests for the org tooling only
 backtest-bot/          THE PRODUCT — all bot code, tests and fixtures (own pyproject.toml / uv.lock)
   src/bitbull/         The trading code (see state below)
@@ -141,7 +144,7 @@ The org and the bot are separate codebases in one repository. Paths in the specs
 
 ## 6. Current state — measured, not remembered
 
-Verified at commit `6427368`:
+Verified 2026-09-20 on a fresh clone, after the org/bot separation (the state table below was first written at `6427368`; paths are now under `backtest-bot/`):
 
 | Component | State |
 |---|---|
@@ -150,11 +153,11 @@ Verified at commit `6427368`:
 | `backtest-bot/src/bitbull/backtest/` | **Skeleton** — 77 lines. No event loop yet |
 | `backtest-bot/src/bitbull/strategy/` | **Skeleton** — 62 lines. **No EMA computation yet** |
 | `backtest-bot/src/bitbull/risk/` `execution/` `obs/` | **Skeletons** — 24 / 36 / 34 lines |
-| Test suite | Handoff author reported 148 passed / 8 failed. **Re-measured 2026-09-20 on a fresh clone: 98 passed / 14 failed** — the same 8 tooling failures plus 6 bot tests that fail because `backtest-bot/src/bitbull/data/` (the loader) was never committed: a bare `data/` rule in `.gitignore` ignored it. `.gitignore` is now anchored; **the loader source itself still has to be recovered from the original environment** (see `docs/backtest-bot/status-and-roadmap.md`) |
+| Test suite | Handoff author reported 148 passed / 8 failed. **Re-measured 2026-09-20 on a fresh clone: 131 passed / 14 failed** (bot 55/6, org tooling 43/8, push gate 33/0) — the same 8 tooling failures plus 6 bot tests that fail because `backtest-bot/src/bitbull/data/` (the loader) was never committed: a bare `data/` rule in `.gitignore` ignored it. `.gitignore` is now anchored; **the loader source itself still has to be recovered from the original environment** (see `docs/backtest-bot/status-and-roadmap.md`) |
 
 **The 8 tooling failures are expected.** They are in `tests/test_tooling.py` and test the CTO's half-finished `msg.py` refactor, which the CEO reverted after QA found it corrupted a work order on every reply. They go green only when the CTO finishes that migration. **No build round may add new red beyond the known set (8 tooling + 6 missing-loader).**
 
-Run it yourself: bot tests `cd backtest-bot && uv run --frozen pytest -q`; org tooling tests `python -m pytest tests/test_tooling.py -q` from the repo root (set `PYTHONUTF8=1` on Windows).
+Run it yourself: bot tests `cd backtest-bot && uv run --frozen pytest -q`; org tooling and push-gate tests `python -m pytest tests/test_tooling.py tests/test_push_gate.py -q` from the repo root (set `PYTHONUTF8=1` on Windows).
 
 ### The EMA initiative (the live piece of work)
 
@@ -179,9 +182,17 @@ Third, softer: the CFO owes four `unset` values in the bar-data annex (`sigma_wi
 
 ## 8. NEXT STEPS — the approved plan, ready to execute
 
-Five dispatches in three batches. Paths are disjoint, verified, so batch 1 runs in parallel.
+Step 0, then five dispatches in three batches. Paths are disjoint, verified, so batch 1 runs in parallel.
 
-### Batch 1 — three agents at once, then commit and push
+### Step 0 — do this BEFORE Batch 1: recover the data loader
+
+`backtest-bot/src/bitbull/data/` (the OHLCV loader, reported at 795 lines: `errors`, `schema`, `manifest`, `bar`, `_timestamps`, `loader`, `adjustment`) and its tests were **never committed** — a bare `data/` rule in `.gitignore` ignored them. The rule is fixed; the files are not in the repository. Batch 1 builds on this package, so do not start it without it.
+
+1. Ask the original cloud session (**"Bitbull Capital agent organization"**) to commit and push `src/bitbull/data/` and its tests (`tests/bitbull/data/`, plus any loader tests elsewhere), or — if it is unrecoverable — have the `backend-developer` rebuild it from `backtest-engine-contract-v1` §5 and `bar-ingestion-and-run-fields-v1` §2, with `qa-tester` review.
+2. Place the files under `backtest-bot/`, confirm `git status` shows them as **untracked, not ignored** (`git check-ignore -v <file>` must print nothing), and run the bot suite. **Expected result: about 105 passed, 0 failed** — derived from the original handoff's 148 passed overall minus the 43 org-tooling tests that pass; the loader's own tests are missing along with the loader (this clone has 61 bot tests, 44 fewer than that). Treat the figure as an estimate to confirm, not a target to match; what is not negotiable is **0 failed** in the bot suite.
+3. Commit and push through the push gate (§13).
+
+### Batch 1 — three agents at once, then commit and push (through the push gate, §13)
 
 **1. `backend-developer`** — B1.5–B1.12 in one dispatch:
 event loop · risk gate (shared code path with paper) · mode fail-closed · bar fill simulator · cost fail-closed · **EMA computation + metrics** · manifest and touch ledger · sweep/null/plateau · alerting · determinism.
@@ -200,7 +211,7 @@ P1–P6 in one dispatch: refusals · leakage battery including two-arm different
 ### Batch 3 — `cto`
 Single review of everything, the F1.3 fake-cash wording question (the rendered pages say "simulat…" but never "fake cash" — accept or send back), accept-or-reject the builds, then sign-off. Then CEO approval → founder final review.
 
-**Push after every batch.**
+**Push after every batch — and every push goes through the push gate (§13): QA verifies, the CTO approves, then it is pushed.**
 
 ### What was deliberately compressed, and the risk
 
@@ -264,7 +275,9 @@ python3 scripts/msg.py routes --role cfo
 python3 scripts/msg.py inbox --role ceo
 ```
 
-Then start Claude Code in the repo root. `CLAUDE.md` loads automatically and points here.
+Then, once per clone, install the push gate: `git config core.hooksPath .githooks` (see §13).
+
+Start Claude Code **in the repo root** — that is what loads `CLAUDE.md` and the ten agent definitions in `.claude/agents/`. A session started elsewhere will not have them. `CLAUDE.md` loads automatically and points here.
 
 ---
 
@@ -274,6 +287,25 @@ Then start Claude Code in the repo root. `CLAUDE.md` loads automatically and poi
 2. Read this file's §6, §7 and §8 — state, blockers, next steps.
 3. Run `python3 scripts/check_boundaries.py --audit` and `cd backtest-bot && uv run --frozen pytest -q` so you know the state rather than trusting this document.
 4. Check `scripts/msg.py inbox --role ceo` for anything open.
-5. Start Batch 1 of §8.
+5. Do **Step 0** of §8 (recover the data loader). Then start Batch 1.
+6. Install the push gate in your clone (§13) before you push anything.
 
 **Behave like the CEO, not like a contractor.** Specifically: challenge what comes back rather than forwarding it; verify claims by running them rather than relaying them; tell the founder bad news the turn you learn it; never sign for the founder; and when an agent flags something rather than guessing, that is the behaviour to reward, not an inconvenience.
+
+---
+
+## 13. The push gate — nothing goes to GitHub without it
+
+**Rule (founder's instruction, 2026-09-20):** no push to the remote repository is made without the CTO's written approval, and the CTO approves only after confirming the result with the tester. It applies to every push, of any size, including documentation.
+
+```
+work committed locally → QA verifies (from a FRESH CLONE, not this working tree)
+  → QA verdict written → CTO reviews QA's evidence → CTO approves in a push-approval record
+  → record committed → git push (the pre-push hook checks the record)
+```
+
+- **The checklist** — what must be updated and reviewed before every push: [`governance/policies/push-checklist.md`](governance/policies/push-checklist.md). Read it before your first push.
+- **The record** — copied from [`governance/templates/push-approval.md`](governance/templates/push-approval.md) into `governance/approvals/YYYY-MM-DD-push-<slug>.md`. QA fills its own block, the CTO fills theirs, nobody fills another's.
+- **The hook** — install it once per clone: `git config core.hooksPath .githooks`. It refuses a push whose tip commit has no matching approved record. Never bypass it (`--no-verify`) and never force-push.
+- **What the gate does not cover** — a `git push` from a clone without the hook installed, and pushes through the GitHub connector's API tools, bypass it. The only complete control is branch protection on GitHub (a founder-side setting). Until then this gate is process plus a local hook, and it works only if every agent follows it.
+- **You cannot approve your own push.** The CEO session carries work between QA and the CTO (courier exception) and runs `git push`; it does not sign for either.

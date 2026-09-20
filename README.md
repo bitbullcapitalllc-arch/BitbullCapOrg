@@ -56,11 +56,16 @@ uv run --frozen python -m bitbull.ui.dash_cli tests/fixtures/runs /tmp/dashout
 | `.claude/` | `agents/` (the ten role definitions), `commands/`, `foundation.md` |
 | `governance/` | Approval policy, templates, signed records, decision log, risk and paper policies |
 | `workspaces/` | The rooms plus `registry.json` — membership and write access |
-| `scripts/` | `msg.py`, `check_boundaries.py`, `spec_lint.py` |
+| `scripts/` | `msg.py`, `check_boundaries.py`, `spec_lint.py`, `check_push_approval.py` (push gate) |
+| `.githooks/` | `pre-push` — refuses a push with no QA-verified, CTO-approved record. Install: `git config core.hooksPath .githooks` |
 | `tests/` | Tests for the org tooling |
 | `specs/` | Published cross-team contracts |
 | `backtest-bot/` | The product: `src/bitbull/`, `tests/`, `pyproject.toml`, `uv.lock` |
 | `docs/org/` · `docs/backtest-bot/` | The two documentation sets |
+
+## Pushing to GitHub
+
+**No push without the CTO's written approval, and the CTO approves only after confirming with the tester.** Every push, any size. Checklist: [`governance/policies/push-checklist.md`](governance/policies/push-checklist.md); rule: [`governance/approval-policy.md`](governance/approval-policy.md) gate 5; how it works: [`docs/org/approval-gates.md`](docs/org/approval-gates.md).
 
 ## Growing the org
 

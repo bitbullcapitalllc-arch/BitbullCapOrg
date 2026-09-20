@@ -35,7 +35,7 @@ flowchart TD
 Four ideas hold the design together:
 
 1. **Rooms are walls.** An agent writes only in its own rooms and speaks only to roles it shares a room with. An executive is the only member of two rooms, so an executive is the only bridge. There is no CEO→trader channel and no analyst→developer channel — not discouraged, *absent*.
-2. **The founder signs last.** Four gates (strategy live, production deploy, binding commitment, capital) each end with the founder. Nobody signs for them. See [`approval-gates.md`](approval-gates.md).
+2. **The founder signs last.** Four gates (strategy live, production deploy, binding commitment, capital) each end with the founder. Nobody signs for them. A fifth gate protects the repository itself: **no push to GitHub without the CTO's approval after QA's fresh-clone verification.** See [`approval-gates.md`](approval-gates.md).
 3. **Separation of duties is structural.** The agent that designs a strategy is not the one that approves it, and neither is the one that executes it.
 4. **Rules are code where they can be.** The boundary is enforced in three layers: instructions, a messaging tool that refuses illegal routes, and an audit script that proves after the fact whether the boundary held. Claude Code itself enforces no per-agent file scopes — see [`workspaces.md`](workspaces.md).
 
@@ -47,7 +47,7 @@ Four ideas hold the design together:
 | [`roles.md`](roles.md) | One-page summary of every role: what it owns and what it cannot do |
 | [`workspaces.md`](workspaces.md) | The five rooms, the write rules, the courier exception, and how the boundary is really enforced |
 | [`communication-protocol.md`](communication-protocol.md) | Who may message whom, message types, the two-rounds-then-escalate rule |
-| [`approval-gates.md`](approval-gates.md) | The four gates as flowcharts, and what each signature means |
+| [`approval-gates.md`](approval-gates.md) | The four capital gates and the push gate as flowcharts, and what each signature means |
 | [`workflows/founder-request.md`](workflows/founder-request.md) | How a founder request becomes a brief |
 | [`workflows/strategy-lifecycle.md`](workflows/strategy-lifecycle.md) | The 13 stages from idea to scale-or-kill |
 | [`workflows/build-and-release.md`](workflows/build-and-release.md) | How a technical initiative reaches production |
@@ -62,8 +62,9 @@ Four ideas hold the design together:
 | `.claude/commands/*.md` | Slash commands for recurring workflows | `ceo` |
 | `governance/` | Approval policy, decision log, risk and paper-trading policies, templates, signed approvals | per `registry.json` |
 | `workspaces/` | The rooms, their messages and work notes, and `registry.json` | that room's members; registry is `ceo` only |
-| `scripts/` | `msg.py` (messaging), `check_boundaries.py` (audit), `spec_lint.py` (spec citations) | `cto` |
-| `tests/` | Tests for the tooling above (`test_tooling.py`) | `cto`, `qa-tester` |
+| `scripts/` | `msg.py` (messaging), `check_boundaries.py` (audit), `spec_lint.py` (spec citations), `check_push_approval.py` (push gate) | `cto` |
+| `.githooks/` | `pre-push` — the push gate's tripwire (`git config core.hooksPath .githooks`) | `cto` |
+| `tests/` | Tests for the tooling above (`test_tooling.py`, `test_push_gate.py`) | `cto`, `qa-tester` |
 | `specs/` | Published cross-team contracts — shared with the bot | executives |
 
 `workspaces/registry.json` is the single authority for membership and write access. Every script reads it.
@@ -91,7 +92,8 @@ scripts/msg.py inbox  --role ceo            # open messages addressed to it
 scripts/check_boundaries.py --audit         # did every message stay in a legal room?
 scripts/check_boundaries.py --role cfo      # did this role write only where it may?
 scripts/spec_lint.py                        # do all spec citations resolve?
-python -m pytest tests/test_tooling.py -q   # tests for the tooling
+python -m pytest tests/test_tooling.py tests/test_push_gate.py -q   # tests for the tooling
+git config core.hooksPath .githooks         # install the push gate, once per clone
 ```
 
 Run the boundary audit before committing a session's work. A violation is a finding, not a formality.

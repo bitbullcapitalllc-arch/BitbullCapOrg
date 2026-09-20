@@ -42,6 +42,7 @@ Two kinds of statement appear below and are kept apart:
 | **Published-spec builds only** | Developers build from the published version in `specs/`, cite it in every report, and route ambiguity CTO → CFO → analyst — never guess |
 | **Never claim what wasn't run** | A test is not "passing" until executed with real output; a latency or throughput figure is not stated unless measured |
 | **Release gate** | QA `PASS` → CTO sign-off → CEO → founder for anything that can place a live order. A dirty tree marks the result non-reproducible in the output |
+| **Push gate** | Every push to GitHub: QA verifies from a **fresh clone**, the CTO approves in a signed record, a local pre-push hook checks the record. Checklist: `governance/policies/push-checklist.md` |
 
 ## 2. Testing strategy
 
@@ -92,7 +93,7 @@ Honest list, measured against this repository on 2026-09-20. None is a blocker f
 | 9 | **8 known-red tooling tests** (`tests/test_tooling.py`) | Six: unfinished `msg.py` migration, reverted after QA found it corrupted a work order. Two: `check_boundaries.py --include-ignored` reports a collapsed ignored directory (`backtest-bot/data/`) rather than the file inside it | CTO finishes the migration and fixes the ignored-path listing | CTO |
 | 10 | **No dependency or secret scanning** | — | Add secret scanning and a dependency audit to CI; the firm's rule 5 (no secrets in the repo) is currently a convention plus `.gitignore` | CTO |
 | 11 | **No `LICENSE` / ownership statement** | `pyproject.toml` says `Proprietary` only | Add a short proprietary-rights notice | CEO / CLO (CLO on hold) |
-| 12 | **No branch protection or review requirement** on GitHub | Work is pushed straight to a feature branch | Require a pull request and a passing CI check before merge to the main branch — mirrors the org's own "reviewed by a different agent" principle | Founder |
+| 12 | **No branch protection or review requirement** on GitHub | Work is pushed straight to a feature branch. The push gate (QA + CTO record, local hook) covers only clones that install the hook; `--no-verify` and API pushes bypass it | Require a pull request and a passing CI check before merge to the main branch — the only server-side enforcement of the push gate | Founder |
 
 ## 5. Definition of done for the bot's first release
 

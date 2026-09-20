@@ -1,0 +1,2 @@
+# The pre-push hook is run by sh: a CRLF checkout (Windows autocrlf) would break it.
+.githooks/* text eol=lf

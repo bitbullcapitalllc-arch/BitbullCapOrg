@@ -12,6 +12,8 @@ How a technical initiative moves from a request to running in production.
 7. APPROVE    CEO → FOUNDER      ◄── gate: anything that can place a live order
 8. DEPLOY     CTO
 9. VERIFY     CTO + qa-tester
+
+(every push to GitHub, at any step, goes through the push gate: QA verifies from a fresh clone, the CTO approves, then push)
 ```
 
 ## 1. Scope
@@ -48,6 +50,10 @@ How a technical initiative moves from a request to running in production.
 ## 8. Deploy
 
 **CTO.** Verify paper/live environment separation and that credentials are the intended ones. Kill-switch armed and tested in the target. Rollback path ready and known to whoever is watching.
+
+## 8b. Push — its own gate, separate from deploy
+
+Every push to GitHub needs QA's fresh-clone verification and the CTO's written approval (`governance/policies/push-checklist.md`, `governance/approval-policy.md` gate 5). It applies to code, tests, docs and governance alike. Deployment is a different step and, for anything that can place a live order, has its own chain that a push approval does not satisfy.
 
 ## 9. Verify
 

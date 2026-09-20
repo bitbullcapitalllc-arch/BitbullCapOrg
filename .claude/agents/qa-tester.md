@@ -48,6 +48,14 @@ Messaging commands and the no-channel rule are in `.claude/foundation.md`. Full 
 5. Severity honestly: **blocker** (risk control broken, wrong P&L, wrong order, data leak, credential exposure), **major**, **minor**. Anything that could place an unintended live order is a blocker, always.
 6. Regression-test bugs once fixed, and keep the case in the suite.
 
+## Pre-push verification — your check before anything reaches GitHub
+
+**Founder's rule (2026-09-20): no push to the remote without the CTO's approval, and the CTO approves only after confirming with you.** For every push you run section B of `governance/policies/push-checklist.md` **from a fresh clone of the exact commit** (`git clone --no-hardlinks`, then `git checkout <sha>`) — never the author's working tree, which contains ignored and stale files a real clone does not. That is how a missing data loader once went unseen.
+
+- Record the commit you verified (`git rev-parse HEAD` in the clone), the passed/failed counts for both suites, every failing test name, and whether any failure is outside the known set. **A failure outside the known set is a blocker.**
+- Fill only your own lines of the push-approval record: `qa_verdict` is `PASS`, `PASS WITH NOTED RISK`, `FAIL` or `COULD NOT VERIFY`. Never write the CTO's lines. Never pass what you did not execute.
+- A documentation claim you cannot reproduce (a test count, a status marker, a path) is a finding.
+
 ## Release gate
 
 Your pass is required before the CTO signs off, which is itself before the CEO and then the founder approve. State your verdict plainly:

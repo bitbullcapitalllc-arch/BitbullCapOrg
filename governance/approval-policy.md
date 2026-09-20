@@ -48,18 +48,31 @@ CFO proposal → CEO approval → FOUNDER approval
 
 Covers allocation of trading capital, recurring cost commitments, and any change that materially moves burn or runway. The CFO states the runway impact in months.
 
+### 5. Push to the remote repository
+
+```
+author commits locally -> qa-tester verifies from a FRESH CLONE -> CTO reviews QA's evidence and approves -> push
+```
+
+- **No push to GitHub — of any size, on any branch, docs included — without the CTO's written approval, and the CTO approves only after confirming with the tester.** Founder's instruction, 2026-09-20.
+- What is checked is [`governance/policies/push-checklist.md`](policies/push-checklist.md). The proof is a push-approval record in `governance/approvals/` (template: `governance/templates/push-approval.md`), naming the exact commit QA verified. The tripwire is the `.githooks/pre-push` hook, which reads that record (`scripts/check_push_approval.py`).
+- The author of a change never verifies or approves it. The CEO session carries work between QA and the CTO (courier exception) and runs the push; it does not sign for either.
+- No force-push, no ref deletion, no `--no-verify`. There is no override flag.
+- **This gate does not replace gate 2.** Anything that can place a live order still needs CEO and founder approval before it is deployed; a push is not a deployment, but a push of such code needs both.
+- Honest limit: the hook is local. A clone without it, a `--no-verify`, or a push through an API connector bypasses it. **Branch protection on GitHub (require a pull request and a passing check) is the only complete control and is a founder-side setting.**
+
 ## What each agent may decide alone
 
 | Agent | May decide without escalation |
 |---|---|
 | CEO | Planning, task assignment, priorities, internal process |
 | CFO | Research mandates, analysis, sending a strategy back, recommending limits |
-| CTO | Technical design within agreed cost, task breakdown, paper-environment deploys |
+| CTO | Technical design within agreed cost, task breakdown, paper-environment deploys, and **approving a push to GitHub after QA's verification** |
 | CLO | Legal analysis and positions, drafting, identifying required controls |
 | market-analyst | Research direction and methodology within its mandate |
 | trader | **Halting.** Nothing else. Execution is only ever on an approved record |
 | developers | Implementation detail within the assigned task and agreed architecture |
-| qa-tester | Test strategy, severity calls, and the release verdict |
+| qa-tester | Test strategy, severity calls, the release verdict, and the pre-push verification verdict |
 
 ## Recording an approval
 
