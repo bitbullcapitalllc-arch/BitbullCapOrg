@@ -26,8 +26,8 @@ Baseline on the original single-tree layout, and again after separating the org 
 |---|---|---|---|---|
 | Bot | `cd backtest-bot && uv run --frozen pytest -q` | 55 | 6 | All six need the missing loader: 2 in `test_import_graph.py`, 4 in `test_no_float_money.py` |
 | Org tooling | `python -m pytest tests/test_tooling.py -q` | 43 | 8 | Six are the unfinished `msg.py` work per the handoff (4 frontmatter-parsing, 2 message-creation). **Two are a separate defect found while checking:** the boundary audit's `--include-ignored` reports the collapsed directory `backtest-bot/data/` instead of the file inside it (observed output), so the two ignored-path tests fail. Known; expected; **no new failures** |
-| Push gate (added later, same day) | `python -m pytest tests/test_push_gate.py -q` | 51 | 0 | — (33 tests at first; 18 regression tests added after QA's first verification found three holes in the gate) |
-| **Total** | | **149** | **14** | The 98 / 14 figure was identical before and after the restructure (**no new red**); the push-gate suite added 51 passing tests |
+| Push gate | `python -m pytest tests/test_push_gate.py -q` | 63 | 0 | — (33 tests at first; 18 regression tests after QA's first verification found three holes in the gate; **12 more after the CTO's review of `8a99ecb` found five**: replace-refs, add-then-remove across commits, merges, submodule-ignore, quoted keys, non-ASCII record names, unsafe path components) |
+| **Total** | | **161** | **14** | The 98 / 14 figure was identical before and after the restructure (**no new red**); the push-gate suite adds 63 passing tests. Bot and org-tooling counts are unchanged by the gate fix — measured again on 2026-09-20 after it |
 
 The handoff reported "148 passed, 8 failed". That does not reproduce from a fresh clone, because the previous check ran in a working tree that still contained the loader and its tests.
 

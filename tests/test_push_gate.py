@@ -73,6 +73,37 @@ class GateCase(unittest.TestCase):
             cmd += ["--remote-sha", remote_sha]
         return subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
 
+    def mktree(self, lines):
+        """Build a tree object from `git ls-tree`-format lines."""
+        # Bytes, not text: text mode would translate every "\n" to "\r\n" on Windows and
+        # git would faithfully create tree entries whose names end in a carriage return.
+        p = subprocess.run(["git", "-C", str(self.repo), "mktree"],
+                           input=("\n".join(lines) + "\n").encode("utf-8"), capture_output=True)
+        self.assertEqual(p.returncode, 0, p.stderr.decode("utf-8", "replace"))
+        return p.stdout.decode("utf-8").strip()
+
+    def commit_raw_entry(self, dirpath, entry, msg):
+        """Commit a tree entry that git's index refuses to hold (a `..` or `.git` name),
+        by building the trees by hand. `entry` is one `git ls-tree`-format line that is
+        inserted into `dirpath`. This is how a hostile tree would actually be made."""
+        parts = dirpath.split("/")
+        sha = self.mktree(self.git("ls-tree", f"HEAD:{dirpath}").splitlines() + [entry])
+        while parts:
+            name = parts.pop()
+            parent = "/".join(parts)
+            listing = self.git("ls-tree", f"HEAD:{parent}" if parent else "HEAD^{tree}")
+            keep = [ln for ln in listing.splitlines() if not ln.endswith(f"\t{name}")]
+            sha = self.mktree(keep + [f"040000 tree {sha}\t{name}"])
+        commit = self.git("commit-tree", sha, "-p", "HEAD", "-m", msg)
+        self.git("update-ref", f"refs/heads/{BRANCH}", commit)
+        return commit
+
+    def blob(self, content):
+        p = subprocess.run(["git", "-C", str(self.repo), "hash-object", "-w", "--stdin"],
+                           input=content, capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(p.returncode, 0, p.stderr)
+        return p.stdout.strip()
+
     def commit_special(self, rel, mode, content, msg):
         """Commit a path with an exact git mode (e.g. 120000 symlink) without needing the
         filesystem to support it. Used to craft paths a Windows checkout cannot easily make."""
@@ -274,6 +305,20 @@ class TestDuplicateKeys(GateCase):
         self.commit({"governance/approvals/2026-09-20-push-test.md": text}, "dup")
         self.assertBlocked(self.gate(), "duplicate key")
 
+    def test_a_quoted_key_cannot_shadow_a_decision(self):
+        """m1: the duplicate-key guard compared raw keys, so `"cto_decision"` and
+        `cto_decision` were two different keys. The record below shows a HELD line to
+        anyone reading it and an APPROVED line to a raw-key parser."""
+        text = record(self.a).replace("cto_decision: APPROVED\n",
+                                      '"cto_decision": HELD\ncto_decision: APPROVED\n')
+        self.commit({"governance/approvals/2026-09-20-push-test.md": text}, "quoted dup")
+        self.assertBlocked(self.gate(), "quoted key")
+
+    def test_a_quoted_key_on_its_own_is_blocked(self):
+        text = record(self.a).replace("qa_verdict: PASS\n", '"qa_verdict": PASS\n')
+        self.commit({"governance/approvals/2026-09-20-push-test.md": text}, "quoted key")
+        self.assertBlocked(self.gate(), "quoted key")
+
     def test_duplicated_qa_verdict_is_blocked(self):
         text = record(self.a).replace("qa_verdict: PASS\n", "qa_verdict: FAIL\nqa_verdict: PASS\n")
         self.commit({"governance/approvals/2026-09-20-push-test.md": text}, "dup")
@@ -342,6 +387,106 @@ class TestFailClosed(GateCase):
             self.assertNotIn(word, source, f"the gate must have no `{word}` escape hatch")
 
 
+class TestHistoryIsReadTheWayGitPushesIt(GateCase):
+    """CTO review of 8a99ecb (findings F1 and F2): the gate read history through
+    refs/replace/* and compared two end points, so a replaced commit or a
+    file added in one commit and deleted in the next was invisible to it.
+    `git push` transfers the real objects and every commit in between."""
+
+    def test_a_replace_ref_cannot_swap_the_history_that_is_checked(self):
+        """F1: `git replace <evil> <benign>` makes every git READ return the benign
+        commit, while the push sends the evil one."""
+        self.approve()
+        record_commit = self.git("rev-parse", "HEAD")
+        benign = self.commit({"governance/approvals/2026-09-20-note.md": "note\n"}, "benign")
+        self.git("reset", "-q", "--hard", record_commit)
+        evil = self.commit({"src/code.py": "x = 2  # slipped in after QA\n"}, "evil")
+        self.git("replace", evil, benign)
+        self.assertEqual(len(self.git("replace", "-l").splitlines()), 1)
+        self.assertBlocked(self.gate(tip=evil), "AFTER the commit QA verified", "src/code.py")
+
+    def test_a_file_added_and_deleted_again_after_the_record_is_blocked(self):
+        """F2: the commonest way a credential reaches a remote -- committed, then
+        removed in the next commit. A two-point diff shows nothing at all."""
+        self.approve()
+        self.commit({"scripts/leak.py": "TOKEN = 'not-a-real-secret'\n"}, "oops")
+        self.git("rm", "-q", "scripts/leak.py")
+        self.git("commit", "-q", "-m", "remove it again")
+        self.assertBlocked(self.gate(), "AFTER the commit QA verified", "scripts/leak.py (A)")
+
+    def test_a_merge_commit_after_the_record_is_blocked(self):
+        """F2: a merge drags in commits the two-point diff cannot attribute. The
+        range after the verified commit must be a linear chain of single-parent commits."""
+        self.approve()
+        record_commit = self.git("rev-parse", "HEAD")
+        self.git("checkout", "-q", "-b", "side", record_commit)
+        self.commit({"governance/approvals/2026-09-20-side.md": "side\n"}, "side note")
+        self.git("checkout", "-q", BRANCH)
+        self.commit({"governance/approvals/2026-09-20-main.md": "main\n"}, "main note")
+        self.git("merge", "-q", "--no-ff", "-m", "merge side", "side")
+        self.assertBlocked(self.gate(), "merge or root commit")
+
+
+class TestSubmoduleChangesAreNotHidden(GateCase):
+    """F3: a gitlink is a pointer to arbitrary code. `diff.ignoreSubmodules=all`, or
+    `ignore = all` in .gitmodules, makes a repointed submodule invisible to a plain diff."""
+
+    def setUp(self):
+        super().setUp()
+        self.commit({".gitmodules": '[submodule "vendor/sub"]\n\tpath = vendor/sub\n'
+                                    '\turl = ./sub\n\tignore = all\n'}, "declare a submodule")
+        self.git("update-index", "--add", "--cacheinfo", f"160000,{self.a},vendor/sub")
+        self.git("commit", "-q", "-m", "point the submodule at a commit")
+        self.a = self.git("rev-parse", "HEAD")
+        self.git("config", "diff.ignoreSubmodules", "all")
+        # The record is committed through plumbing so that `git add -A` cannot disturb
+        # the gitlink, whose directory does not exist in this test's working tree.
+        self.commit_special("governance/approvals/2026-09-20-push-test.md", "100644",
+                            record(self.a), "approval record")
+
+    def test_repointing_the_submodule_after_the_record_is_blocked(self):
+        target = self.git("rev-parse", "HEAD")           # any other commit object
+        self.git("update-index", "--add", "--cacheinfo", f"160000,{target},vendor/sub")
+        self.git("commit", "-q", "-m", "repoint the submodule")
+        self.assertBlocked(self.gate(), "AFTER the commit QA verified", "vendor/sub (M)")
+
+    def test_the_record_still_works_when_nothing_moved(self):
+        """The control must not simply block everything with a submodule in the tree."""
+        self.assertAllowed(self.gate())
+
+
+class TestPathShapesInsideTheExemption(GateCase):
+    """m4: `governance/approvals/` was a string prefix test. A tree entry named `..` or
+    `.git` keeps the prefix and the `.md` suffix while writing outside the directory."""
+
+    def test_a_dotdot_component_is_blocked(self):
+        self.approve()
+        payload = self.blob("x = 2\n")
+        evil = self.mktree([f"100644 blob {payload}\tescaped.md"])
+        self.commit_raw_entry("governance/approvals", f"040000 tree {evil}\t..", "escape")
+        self.assertBlocked(self.gate(), "governance/approvals/../escaped.md")
+
+    def test_a_dot_git_component_is_blocked(self):
+        self.approve()
+        payload = self.blob("#!/bin/sh\n")
+        evil = self.mktree([f"100644 blob {payload}\tpre-commit.md"])
+        self.commit_raw_entry("governance/approvals", f"040000 tree {evil}\t.git", "into .git")
+        self.assertBlocked(self.gate(), "governance/approvals/.git/pre-commit.md")
+
+
+class TestNonAsciiRecordNames(GateCase):
+    """m2: `ls-tree` C-quotes a non-ASCII path by default, so the record became invisible
+    to the name match and a legitimate push was refused. It fails closed, but it fails."""
+
+    def test_a_record_with_a_non_ascii_filename_is_found(self):
+        self.approve(name="2026-09-20-push-tëst.md")
+        self.assertAllowed(self.gate())
+
+    def test_a_non_ascii_record_is_still_judged_on_its_contents(self):
+        self.approve(name="2026-09-20-push-tëst.md", qa_verdict="FAIL")
+        self.assertBlocked(self.gate(), "qa_verdict")
+
+
 @unittest.skipUnless(HOOK.exists(), "hook not present")
 class TestHookScript(GateCase):
     """The hook itself, run the way git runs it: ref updates on stdin."""
@@ -383,6 +528,11 @@ class TestHookScript(GateCase):
         self.assertIn("check_push_approval.py", text)
         self.assertIn("exit 1", text)              # no interpreter found => refuse
         self.assertNotIn("--no-verify", text.replace("Never use --no-verify", ""))
+
+    def test_the_hook_and_the_checker_both_disable_replace_refs(self):
+        """F1: the hook's own `git rev-parse` must not read refs/replace/* either."""
+        self.assertIn("--no-replace-objects", HOOK.read_text(encoding="utf-8"))
+        self.assertIn("--no-replace-objects", SCRIPT.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

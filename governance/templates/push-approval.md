@@ -19,7 +19,7 @@ cto_decision: PENDING
 >
 > Allowed values — `qa_verdict`: `PASS` · `PASS WITH NOTED RISK` · `FAIL` · `COULD NOT VERIFY`. `cto_decision`: `APPROVED` · `HELD`. Only `PASS` / `PASS WITH NOTED RISK` together with `APPROVED` lets a push through.
 >
-> **`approved_commit` is the commit QA verified.** This record is committed *after* it, in a commit that changes only `governance/approvals/**`; the hook allows exactly that and nothing else between the approved commit and the pushed tip.
+> **`approved_commit` is the commit QA verified.** This record is committed *after* it, in a commit that only **adds or modifies regular `*.md` files under `governance/approvals/`** — that, and nothing else, is what the hook allows in **every** commit between the approved commit and the pushed tip (no deletions, renames, symlinks, mode changes, submodule moves, non-`.md` files, merge commits, or `.` / `..` / `.git` path components).
 
 ## 1. What is being pushed
 

@@ -153,7 +153,7 @@ Verified 2026-09-20 on a fresh clone, after the org/bot separation (the state ta
 | `backtest-bot/src/bitbull/backtest/` | **Skeleton** — 77 lines. No event loop yet |
 | `backtest-bot/src/bitbull/strategy/` | **Skeleton** — 62 lines. **No EMA computation yet** |
 | `backtest-bot/src/bitbull/risk/` `execution/` `obs/` | **Skeletons** — 24 / 36 / 34 lines |
-| Test suite | Handoff author reported 148 passed / 8 failed. **Re-measured 2026-09-20 (working tree, pending a fresh-clone re-verification): 149 passed / 14 failed** (bot 55/6, org tooling 43/8, push gate 51/0) — the same 8 tooling failures plus 6 bot tests that fail because `backtest-bot/src/bitbull/data/` (the loader) was never committed: a bare `data/` rule in `.gitignore` ignored it. `.gitignore` is now anchored; **the loader source itself still has to be recovered from the original environment** (see `docs/backtest-bot/status-and-roadmap.md`) |
+| Test suite | Handoff author reported 148 passed / 8 failed. **Re-measured 2026-09-20 after the push-gate fix (working tree, pending a fresh-clone re-verification): 161 passed / 14 failed** (bot 55/6, org tooling 43/8, push gate 63/0 — the gate suite grew by 12 regression tests; bot and tooling counts unchanged) — the same 8 tooling failures plus 6 bot tests that fail because `backtest-bot/src/bitbull/data/` (the loader) was never committed: a bare `data/` rule in `.gitignore` ignored it. `.gitignore` is now anchored; **the loader source itself still has to be recovered from the original environment** (see `docs/backtest-bot/status-and-roadmap.md`) |
 
 **The 8 tooling failures are expected.** They are in `tests/test_tooling.py` and test the CTO's half-finished `msg.py` refactor, which the CEO reverted after QA found it corrupted a work order on every reply. They go green only when the CTO finishes that migration. **No build round may add new red beyond the known set (8 tooling + 6 missing-loader).**
 
@@ -312,36 +312,42 @@ work committed locally → QA verifies (from a FRESH CLONE, not this working tre
 
 ---
 
-## 14. RESUME HERE — a push is half-done (2026-09-20)
+## 14. RESUME HERE — three commits are waiting on one QA verification (2026-09-20)
 
-**Read this section first if you are the session that picks this up.** A push was interrupted deliberately, and the rest of the file is unchanged in meaning.
+**Read this section first if you are the session that picks this up.** Nothing is broken; a push is deliberately stopped inside its own gate, which is the gate working.
 
 ### Where things stand
 
 | | |
 |---|---|
 | Remote branch `claude/bitbull-capital-org-structure-eiiv8c` | At `089caa1` (org/bot separation and docs) — **pushed, verified** |
-| Local branch | One commit ahead: `8079c73` *"Add the push gate; fix HANDOFF and CLAUDE.md; document the recovery step"* — **not pushed** |
-| Uncommitted, on disk in the working tree | The three fixes to `scripts/check_push_approval.py`, the 18 regression tests in `tests/test_push_gate.py`, the updated numbers, a new decision-log entry, and this section. **Commit these first** (checklist section A, then a local commit; the hook does not gate commits) |
-| Push gate installed in that clone | Yes: `git config core.hooksPath` prints `.githooks`. Git identity is set locally (`bitbullcapitalllc`). Re-run `git config core.hooksPath .githooks` in any other clone |
+| Local, not pushed | `8079c73` *"Add the push gate…"* · `8a99ecb` *"Harden the push gate…"* · and the CTO's fix commit on top of them (its SHA: **see `git log`** — do not quote a hash you have not read) |
+| `8a99ecb` | **HELD by the `cto`**, not approved. Reasons and evidence: `workspaces/engineering/work/2026-09-20-cto-push-gate-review.md`. Its record `governance/approvals/2026-09-20-push-gate-hardening.md` is **superseded and must not be reused** |
+| The fix commit | Authored by the `cto` (`scripts/**` is cto-only): five real bypasses of the gate closed — refs/replace, add-then-remove across commits, merges in the approved range, `diff.ignoreSubmodules`, quoted front-matter keys — plus non-ASCII record names and `.`/`..`/`.git` path components. 12 regression tests, each demonstrated failing against `8a99ecb`. Evidence: `workspaces/engineering/work/2026-09-20-cto-push-gate-fix.md` |
+| Measured after the fix (working tree, pending fresh-clone re-verification) | bot **55 passed / 6 failed**, org tooling **43 / 8**, push gate **63 / 0** |
+| Push gate installed in this clone | Yes: `git config core.hooksPath` prints `.githooks`. Git identity is set locally (`bitbullcapitalllc`). Re-run `git config core.hooksPath .githooks` in any other clone |
 
 ### Why the push has not happened
 
-The founder set a rule: **no push without the CTO's approval, after the CTO confirms with the tester.** The previous session ran the gate for the first time and it did its job — QA's fresh-clone verification of `8079c73` came back **FAIL** with three findings in the gate itself (rename-into-approvals bypass, force-push allowed, duplicate keys). Those are fixed and tested, but **not yet re-verified by QA**. Full account: `governance/decision-log.md`, entry *"The push gate's first verification failed…"*.
+The founder set a rule: **no push without the CTO's approval, after the CTO confirms with the tester.** The gate has now stopped two pushes on its own merits:
 
-That verification was done by a **stand-in** — a general-purpose agent told to act as `qa-tester` — because the named agents were not loadable in a session that had not been started in the repository root. **The founder rejected that as the way to sign. Do not reuse that record or verdict as an approval.** Use it only as the description of the three findings.
+1. QA's fresh-clone verification of `8079c73` came back **FAIL** — rename-into-approvals bypass, force-push allowed, duplicate keys. Fixed in `8a99ecb`. That verification was done by a **stand-in** (a general-purpose agent told to act as `qa-tester`), which the founder rejected as a way to sign. Use that record only as a description of the three findings, never as an approval.
+2. The `cto` then **HELD** `8a99ecb`: the code read history through `refs/replace/*` and compared only two end points, and the file's own "honest limits" did not say so. Fixed in the commit now at the tip, which also rewrites those limits to be true.
+
+Full account: `governance/decision-log.md`.
 
 ### Do this, in order
 
 1. **Start the session in `C:\Users\capit\BitbullCapOrg`** (that is what loads `CLAUDE.md` and `.claude/agents/`). **Confirm the real agents loaded** before doing anything else: a call to `qa-tester` and `cto` by name must not return *"Agent type not found"*. If it does, stop and tell the founder.
-2. Read `governance/policies/push-checklist.md`. Do **section A** for the working tree (including `git status --ignored`), then commit the uncommitted work locally. Record the new commit SHA — that is the commit QA verifies.
-3. **Real `qa-tester`**, via the courier exception: verify **that SHA from a fresh clone** (`git clone --no-hardlinks`), running section B. Expected: bot **55 passed / 6 failed** (the missing loader), org tooling **43 / 8** (known), push gate **51 / 0**; anything else is a finding. Ask it to **attack the gate again** — try to defeat the three fixes and look for new holes — and to save its report to disk as it goes. The script's own docstring lists the limits that are known and accepted.
-4. **Real `cto`**: reads QA's evidence and the diff (in full for `scripts/check_push_approval.py`, `.githooks/pre-push`, `workspaces/registry.json`, the agent definitions) and decides `APPROVED` or `HELD`, filling only its own block of a push-approval record (`governance/templates/push-approval.md`). If QA or the CTO holds it, fix and repeat from step 2. **You are transport; you do not sign for either.**
-5. Commit the completed record in a commit that changes **only** `governance/approvals/**`, then `git push origin claude/bitbull-capital-org-structure-eiiv8c`. The hook checks the record. **Never `--no-verify`, never force.** Then `git ls-remote origin <branch>` must equal the local tip — report the SHA, and report a hung or refused push as exactly that.
+2. Read `governance/policies/push-checklist.md`. Do **section A** for the working tree (including `git status --ignored`), then commit anything still uncommitted. Record the tip SHA — that is the commit QA verifies (`git log --oneline -1`; do not carry a hash from this file).
+3. **Real `qa-tester`**, via the courier exception: verify **that SHA from a fresh clone** (`git clone --no-hardlinks`), running section B. Expected: bot **55 passed / 6 failed** (the missing loader), org tooling **43 / 8** (known), push gate **63 / 0**; anything else is a finding. Ask it to **attack the gate again** — try to defeat all five closed bypasses and look for new holes — and to save its report to disk as it goes. The script's own docstring lists the limits that remain open and accepted.
+4. **Real `cto`**: reads QA's evidence and the diff (in full for `scripts/check_push_approval.py`, `.githooks/pre-push`, `tests/test_push_gate.py`, `workspaces/registry.json`) and decides `APPROVED` or `HELD` in a **new** record from `governance/templates/push-approval.md`, filling only its own block. The superseded `2026-09-20-push-gate-hardening.md` record is audit trail — never reused. If QA or the CTO holds it, fix and repeat from step 2. **You are transport; you do not sign for either.**
+5. Commit the completed record in a commit that changes **only** added or modified `*.md` files under `governance/approvals/`, then `git push origin claude/bitbull-capital-org-structure-eiiv8c`. The hook checks the record. **Never `--no-verify`, never force.** Then `git ls-remote origin <branch>` must equal the local tip — report the SHA, and report a hung or refused push as exactly that.
 6. Log the dispatches in `workspaces/exec/work/token-ledger.md` **in the next change** — the ledger cannot be edited between the commit QA verifies and the push, because the gate allows only approval records to change after it.
 
 ### Still open, not part of the push
 
 - **The data loader is missing** (`backtest-bot/src/bitbull/data/`) — §8 Step 0. The obvious source is the cloud session named *"Bitbull Capital agent organization"*; the founder has not yet said to message it.
-- **GitHub branch protection** (require a pull request and a passing check) is the only complete enforcement of the push gate, and is a founder-side setting that is not enabled.
+- **GitHub branch protection** (require a pull request and a passing check) is the only complete enforcement of the push gate, and is a founder-side setting that is not enabled. Until it is, the gate is a local hook: `--no-verify`, a clone without the hook, an edit to the script, or a push through a GitHub API client all go around it.
+- **One founder-visible wording question, raised by the CEO, not settled:** the record template says the author "must not be the signer of sections 2 or 3", but `scripts/**` is `cto`-only, so the CTO must author its own gate fixes and also signs section 3. The compensating control is QA's adversarial fresh-clone verification. The CTO proposes the line become "must not be the QA signer", with the CTO-as-author case named as an exception. **Not changed pending the founder.**
 - **Environment on this machine:** `uv` is not on PATH — use `python -m uv`; set `PYTHONUTF8=1` for any Python; the bot's env lives in `backtest-bot/.venv` (rebuild with `python -m uv sync --frozen`); `gh` is not installed; `git push` needed an interactive GitHub sign-in the first time and then worked.

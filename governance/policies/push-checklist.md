@@ -89,7 +89,7 @@ git rev-parse HEAD                            # record it in the verdict
 |---|---|---|
 | Bot | 6 — `test_import_graph` (2), `test_no_float_money` (4) | The data loader was never committed. **Removed from this list the moment the loader lands** |
 | Org tooling | 8 — `TestS3FrontmatterParsing` (4), `TestGitignoredPaths` (2: `include_ignored_*`), `TestExistingBehaviourPreserved` (2) | Unfinished `msg.py` migration (6); ignored-path audit lists a collapsed directory (2) |
-| Push gate | 0 — all 51 tests in `tests/test_push_gate.py` must pass | — |
+| Push gate | 0 — all 63 tests in `tests/test_push_gate.py` must pass | — |
 
 **Verdict** — one of: `PASS`, `PASS WITH NOTED RISK` (each risk named), `FAIL`, or `COULD NOT VERIFY` (say which check could not be run and why). Pressure and deadlines do not change the verdict; only evidence does. No `PASS` with an open blocker, a failing test outside the known set, or a check that was not executed.
 
@@ -106,13 +106,13 @@ The CTO does not rubber-stamp the QA verdict. They:
 - [ ] Read QA's **evidence** (commands and real output), not only the verdict line.
 - [ ] Read the diff at the level the risk warrants — everything in `risk/`, `execution/`, `scripts/`, `.githooks/`, `registry.json` and approval machinery in full.
 - [ ] Check section A was honestly completed, in particular the ignored-files and fresh-clone items.
-- [ ] Confirm the branch and remote are the intended ones, and that the push is **not** a force-push or a deletion.
+- [ ] Confirm the branch and remote are the intended ones, and that the push is **not** a force-push or a deletion. The record binds the remote **name**, not its URL, so read the URL by eye: `git remote get-url <remote>` must be the firm's repository and nothing else.
 - [ ] Confirm nothing in the push needs a higher gate (CEO/founder) that has not been given.
 - [ ] Decide: **APPROVED**, or **HELD** with specifics sent back to the author. A hold is the process working, not a failure.
 
 ## E. The push and after
 
-- [ ] The approval record is committed, and names the exact commit being approved (`approved_commit`). Only `governance/approvals/**` may change between that commit and the tip.
+- [ ] The approval record is committed, and names the exact commit being approved (`approved_commit`). Between that commit and the tip, **every commit** may add or modify regular `*.md` files under `governance/approvals/` and nothing else — no deletions, renames, symlinks, mode changes, submodule moves, non-`.md` files, merges, or paths containing a `.`, `..` or `.git` component. That is exactly what the hook enforces, commit by commit.
 - [ ] The pre-push hook is installed (`git config core.hooksPath .githooks`) and was **not** bypassed.
 - [ ] Push **only** the approved commit to the approved branch.
 - [ ] Afterwards: `git ls-remote origin <branch>` equals the local tip. Report the resulting SHA — **an unverified push is not reported as done.**

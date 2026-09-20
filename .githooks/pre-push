@@ -3,7 +3,9 @@
 # Rule and checklist: governance/policies/push-checklist.md. Install once per clone:
 #     git config core.hooksPath .githooks
 # Fail closed: if no working Python is found, the push is refused. Never use --no-verify.
-root="$(git rev-parse --show-toplevel)" || exit 1
+# --no-replace-objects on every git call here too: a refs/replace/* entry must not be
+# able to change what this hook reads (the checker applies the same flag to its own calls).
+root="$(git --no-replace-objects rev-parse --show-toplevel)" || exit 1
 for py in python3 python; do
     # `-c ""` skips stubs (e.g. the Windows Store launcher) that exist but cannot run code.
     if "$py" -c "" >/dev/null 2>&1; then

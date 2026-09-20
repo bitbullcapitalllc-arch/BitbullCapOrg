@@ -14,16 +14,21 @@ record, committed in that tip's own tree under governance/approvals/, where:
 
   * record_type is `push-approval`;
   * approved_commit is a real commit and an ancestor of (or equal to) the tip;
-  * everything changed between approved_commit and the tip is a plain ADDED or
-    MODIFIED regular `*.md` file under governance/approvals/ -- i.e. the record is
-    committed AFTER the verified commit and nothing else slipped in behind QA's
-    back. The comparison is made with rename detection OFF: with it on, deleting
-    src/x.py and adding governance/approvals/x.txt shows up as one harmless
-    "rename" into the exempt directory (a bypass QA found on the first run).
-    Deletions, renames, symlinks, non-.md files and mode changes all count as
-    changes outside the exemption;
-  * the front matter has no duplicate keys (last-one-wins would let a `HELD`
-    followed by `APPROVED` pass);
+  * EVERY COMMIT between approved_commit and the tip changes nothing but plain
+    ADDED or MODIFIED regular `*.md` files under governance/approvals/ -- i.e.
+    the record is committed AFTER the verified commit and nothing else slipped in
+    behind QA's back. The check is per commit, not a two-point diff, because a
+    file added in one commit and deleted in the next is invisible to a two-point
+    diff (that is how a committed credential usually reaches a remote), and any
+    merge or root commit in that range is refused outright rather than reasoned
+    about. Rename detection is OFF: with it on, deleting src/x.py and adding
+    governance/approvals/x.txt shows up as one harmless "rename" into the exempt
+    directory (a bypass QA found on the first run). Deletions, renames, symlinks,
+    gitlinks (submodules), non-.md files, mode changes, and any path with a `.`,
+    `..` or `.git` component all count as changes outside the exemption;
+  * the front matter has no duplicate keys and no quoted keys (last-one-wins would
+    let a `HELD` followed by `APPROVED` pass, and quoting a key is how you make
+    two lines that look like duplicates but are not);
   * qa_signed_by is `qa-tester` and qa_verdict is PASS or PASS WITH NOTED RISK;
   * cto_signed_by is `cto` and cto_decision is APPROVED;
   * branch matches the branch being pushed, and remote matches the remote;
@@ -31,20 +36,43 @@ record, committed in that tip's own tree under governance/approvals/, where:
     ref it must be an ancestor of the commit being pushed (a rewrite of approved
     history is refused, and so is a remote tip this clone has not fetched).
 
+Every git call is made with --no-replace-objects, and every diff with
+--ignore-submodules=none plus `-c diff.ignoreSubmodules=none`, so that a
+refs/replace/* entry, a `diff.ignoreSubmodules` config value or an `ignore =
+all` line in .gitmodules cannot make this script read a different history from
+the one `git push` transfers. Paths are read with -z (and core.quotePath=false)
+so a non-ASCII filename is seen as itself rather than as a C-quoted string.
+
 Fail closed, on purpose: a missing, malformed or unreadable record blocks the
 push; deleting a remote ref, or pushing anything that is not a branch, is
 refused; there is NO override flag and none will be added (firm rule: a control
 that can be disabled by configuration alone is not a control).
 
-Honest limits -- stated because a checker that is confidently wrong gets ignored:
-  * It proves a record EXISTS and is well-formed. It cannot prove QA really
-    ran the checklist or that the CTO really read the evidence, and nothing here
-    verifies WHO wrote a record. check_boundaries.py and the CTO's review are the
-    check on authorship.
-  * It runs locally. `git push --no-verify`, a clone without the hook, editing or
-    replacing this script or the hook in the clone, and the GitHub connector's
-    API tools all bypass it. The only complete control is branch protection on
-    GitHub (a founder-side setting).
+Honest limits -- stated because a checker that is confidently wrong gets ignored,
+and because a successor will read this list as the specification:
+  * It proves a record EXISTS, is well-formed and binds the history being
+    pushed. It cannot prove QA really ran the checklist or that the CTO really
+    read the evidence, and nothing here verifies WHO wrote a record: a forged
+    record with both signature lines is accepted. check_boundaries.py and the
+    CTO's own diff review are the only check on authorship.
+  * Any `*.md` file under governance/approvals/ may ride along in the commits
+    after the verified one, including files that are not push records.
+  * It trusts the clone it runs in. Anyone able to write inside that clone can
+    edit this script or the hook, remove core.hooksPath, or write
+    .git/info/grafts (a deprecated graft file is NOT disabled by
+    --no-replace-objects) and defeat it. It also trusts the `git` binary on PATH.
+  * It runs locally and only where git runs it. `git push --no-verify`, a clone
+    without the hook installed, and pushes made through a GitHub API client
+    (including the GitHub connector's tools) never invoke it at all. The only
+    complete control is branch protection on GitHub -- a founder-side setting
+    that is NOT yet enabled.
+  * The remote's position is whatever git handed the hook when the push began; a
+    remote that moves between that moment and the transfer is not re-checked.
+  * A record binds the remote NAME (`origin`), not its URL. Checklist section D
+    has the CTO confirm the URL with `git remote get-url` by eye.
+  * The front matter parser is line-based, not a YAML parser: a leading BOM, or
+    front matter written as real YAML (block values, anchors), is not understood
+    and blocks the push rather than being interpreted.
 
 Usage:
     (hook)   check_push_approval.py --hook <remote-name> <remote-url>   # ref lines on stdin
@@ -62,13 +90,42 @@ ZERO = "0" * 40
 APPROVALS_DIR = "governance/approvals/"
 QA_OK = ("PASS", "PASS WITH NOTED RISK")
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+# Main git options applied to EVERY call: never read refs/replace/*, never let a
+# config value hide a submodule change, never C-quote a path.
+GIT_OPTS = ("--no-replace-objects", "-c", "diff.ignoreSubmodules=none",
+            "-c", "core.quotePath=false")
+# Path components that must never appear in a path riding the approvals exemption.
+DOT_NAMES = (".", "..")
+GIT_NAMES = (".git", "git~1")
 
 
 def git(repo, *args):
     """Run git; return (returncode, stdout). Never raises on a nonzero exit."""
-    p = subprocess.run(["git", "-C", repo, *args], capture_output=True, text=True,
+    p = subprocess.run(["git", *GIT_OPTS, "-C", repo, *args], capture_output=True, text=True,
                        encoding="utf-8", errors="replace")
     return p.returncode, p.stdout
+
+
+def unsafe_path(path):
+    """Reason this path is not a plain, contained repository path, or None if it is.
+
+    A tree can hold an entry named `..` or `.git` even though git refuses to add one
+    through the index, and such a path escapes the directory it appears to live in
+    when checked out. `governance/approvals/../../scripts/x.md` starts with the exempt
+    prefix and ends in `.md`, so the exemption has to reject the shape, not the string.
+    """
+    if not path:
+        return "empty path"
+    if "\\" in path:
+        return f"`{path}`: backslash in a git path"
+    for part in path.split("/"):
+        if part in DOT_NAMES:
+            return f"`{path}`: `{part}` path component"
+        # NTFS ignores trailing dots and spaces, so `.git.` reaches `.git`.
+        folded = part.rstrip(". ").lower()
+        if folded in GIT_NAMES or folded.startswith(".git:") or not folded:
+            return f"`{path}`: `{part}` path component"
+    return None
 
 
 def parse_record(text):
@@ -76,7 +133,9 @@ def parse_record(text):
 
     Returns (meta, error); error is None on success. Duplicate keys are an error:
     silently keeping the last one would let `cto_decision: HELD` be overridden by a
-    later `cto_decision: APPROVED` line.
+    later `cto_decision: APPROVED` line. A quoted key (`"cto_decision": APPROVED`)
+    is an error too -- it is the same trick with the duplicate hidden from a
+    string comparison, and no legitimate record needs it.
     """
     lines = text.replace("\r\n", "\n").split("\n")
     if not lines or lines[0].strip() != "---":
@@ -88,17 +147,24 @@ def parse_record(text):
         if ":" in line:
             key, value = line.split(":", 1)
             key = key.strip()
-            if key in meta:
-                return None, f"duplicate key `{key}`"
-            meta[key] = value.strip()
+            plain = key.strip("\"'`  \t")
+            if plain != key:
+                return None, f"quoted key `{key}` (write keys plain: `{plain}`)"
+            if not plain:
+                return None, "empty key"
+            if plain in meta:
+                return None, f"duplicate key `{plain}`"
+            meta[plain] = value.strip()
     return None, "unterminated front matter"
 
 
-def changes_after(repo, approved, tip):
-    """Changes from `approved` to `tip` that are NOT a plain added/modified *.md file
-    under governance/approvals/. Rename detection is OFF (see the module docstring).
+def tree_changes(repo, old, new):
+    """Changes from commit `old` to commit `new` that are NOT a plain added/modified
+    regular *.md file under governance/approvals/. Rename detection is OFF and
+    submodule changes are never suppressed (see the module docstring).
     Returns a list of "path (status)" strings, or None if git could not answer."""
-    rc, out = git(repo, "diff", "--raw", "--no-renames", "-z", approved, tip)
+    rc, out = git(repo, "diff", "--raw", "--no-renames", "--ignore-submodules=none", "-z",
+                  old, new)
     if rc != 0:
         return None
     parts = out.split("\0")
@@ -109,10 +175,44 @@ def changes_after(repo, approved, tip):
         # meta = [":<old mode>", "<new mode>", "<old sha>", "<new sha>", "<status>"]
         new_mode, status = meta[1], meta[4]
         ok = (status in ("A", "M") and new_mode == "100644"
-              and path.startswith(APPROVALS_DIR) and path.endswith(".md"))
+              and path.startswith(APPROVALS_DIR) and path.endswith(".md")
+              and unsafe_path(path) is None)
         if not ok:
             offending.append(f"{path} ({status})")
         i += 2
+    return offending
+
+
+def changes_after(repo, approved, tip):
+    """Everything between `approved` and `tip` that is outside the approvals exemption,
+    checked COMMIT BY COMMIT so that a file added in one commit and deleted in the next
+    cannot hide inside a two-point diff. A merge or root commit in the range is itself a
+    finding. Returns a list of strings, or None if git could not answer."""
+    rc, out = git(repo, "rev-list", "--reverse", f"{approved}..{tip}")
+    if rc != 0:
+        return None
+    offending = []
+    for sha in out.split():
+        rc, line = git(repo, "rev-list", "--parents", "-n", "1", sha)
+        if rc != 0:
+            return None
+        parents = line.split()[1:]
+        if len(parents) != 1:
+            offending.append(f"{sha[:12]} has {len(parents)} parents: a merge or root commit "
+                             "after the verified commit is refused")
+            continue
+        found = tree_changes(repo, parents[0], sha)
+        if found is None:
+            return None
+        offending.extend(f"{sha[:12]} {item}" for item in found)
+    # Cross-check: the end-to-end diff must agree that nothing else moved. If the
+    # per-commit walk found nothing but this does, something is wrong with the walk
+    # and the push is refused rather than explained away.
+    cumulative = tree_changes(repo, approved, tip)
+    if cumulative is None:
+        return None
+    if cumulative and not offending:
+        offending.extend(f"{approved[:12]}..{tip[:12]} {item}" for item in cumulative)
     return offending
 
 
@@ -180,10 +280,14 @@ def evaluate(repo, tip, ref, remote, remote_sha=ZERO):
         if rc != 0:
             return False, [f"{ref}: not a fast-forward of the remote ({remote_sha[:12]}) -- a force-push "
                            "or history rewrite is not permitted through this gate"]
-    rc, listing = git(repo, "ls-tree", "-r", "--name-only", tip, "--", APPROVALS_DIR)
+    rc, listing = git(repo, "ls-tree", "-r", "-z", "--name-only", tip, "--", APPROVALS_DIR)
     if rc != 0:
         return False, [f"{ref}: could not read {APPROVALS_DIR} from {tip[:12]}"]
-    candidates = [p for p in listing.splitlines() if re.search(r"push[^/]*\.md$", p)]
+    entries = [p for p in listing.split("\0") if p]
+    unsafe = [unsafe_path(p) for p in entries if unsafe_path(p)]
+    if unsafe:
+        return False, [f"{ref}: unsafe path under {APPROVALS_DIR} in {tip[:12]}: {unsafe[0]}"]
+    candidates = [p for p in entries if re.search(r"push[^/]*\.md$", p)]
     if not candidates:
         return False, [f"{ref}: no push-approval record under {APPROVALS_DIR} in {tip[:12]}"]
 
