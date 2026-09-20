@@ -11,9 +11,10 @@ graph TD
         CLO["CLO<br/><i>regulatory, compliance, contracts</i>"]
     end
 
-    subgraph WS_FIN["workspaces/finance — CFO · analyst · trader"]
+    subgraph WS_FIN["workspaces/finance — CFO · analyst · trader · cost-optimizer"]
         MA["market-analyst<br/><i>research, strategy, backtesting</i>"]
         TR["trader<br/><i>execution only, within limits</i>"]
+        CO["cost-optimizer<br/><i>token and operational cost</i>"]
     end
 
     subgraph WS_ENG["workspaces/engineering — CTO · backend · frontend · QA"]
@@ -34,6 +35,7 @@ graph TD
     CEO --> CLO
     CFO --> MA
     CFO --> TR
+    CFO --> CO
     CTO --> BE
     CTO --> FE
     CTO --> QA
@@ -47,14 +49,14 @@ graph TD
     SPECS -. read .-> QA
 ```
 
-Reporting lines are solid. The boxes are workspaces: an agent writes only in the rooms it appears in, and may message only the roles it shares a room with. The CFO, CTO and CLO each sit in two rooms — they are the only bridges. Cross-team artifacts cross through `specs/`, never by reading into another room. See `docs/workspaces.md`.
+Reporting lines are solid. The boxes are workspaces: an agent writes only in the rooms it appears in, and may message only the roles it shares a room with. The CFO, CTO and CLO each sit in two rooms — they are the only bridges. Cross-team artifacts cross through `specs/`, never by reading into another room. See `docs/org/workspaces.md`.
 
 ## Reporting lines
 
 | Agent | Role | Reports to | Direct reports | Rooms |
 |---|---|---|---|---|
 | `ceo` | Chief Executive Officer | Founder | CFO, CTO, CLO | exec, founder |
-| `cfo` | Chief Financial Officer | CEO | market-analyst, trader | exec, finance |
+| `cfo` | Chief Financial Officer | CEO | market-analyst, trader, cost-optimizer | exec, finance |
 | `cto` | Chief Technology Officer | CEO | backend, frontend, QA | exec, engineering |
 | `clo` | Chief Legal Officer | CEO | — | exec, legal |
 | `market-analyst` | Quantitative Analyst | CFO | — | finance |
@@ -62,6 +64,7 @@ Reporting lines are solid. The boxes are workspaces: an agent writes only in the
 | `backend-developer` | Backend Developer | CTO | — | engineering |
 | `frontend-developer` | Frontend Developer | CTO | — | engineering |
 | `qa-tester` | QA Engineer | CTO | — | engineering |
+| `cost-optimizer` | Cost Optimizer | CFO | — | finance |
 
 ## Cross-functional interfaces
 

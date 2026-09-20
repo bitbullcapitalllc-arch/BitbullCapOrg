@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "description": "Authoritative map of Bitbull Capital's agent workspaces, membership and write access. Read by scripts/msg.py and scripts/check_boundaries.py. Changing this file changes the firm's boundaries: CEO-only, and a change belongs in governance/decision-log.md.",
   "roles": {
     "ceo": {
@@ -221,24 +221,52 @@
     "workspaces/founder/**": [
       "ceo"
     ],
-    "src/**": [
+    "backtest-bot/src/**": [
       "cto",
       "backend-developer",
       "frontend-developer"
     ],
-    "tests/**": [
+    "backtest-bot/tests/**": [
       "cto",
       "qa-tester",
       "backend-developer",
       "frontend-developer"
     ],
-    "pyproject.toml": [
+    "backtest-bot/pyproject.toml": [
       "cto",
       "backend-developer"
     ],
-    "uv.lock": [
+    "backtest-bot/uv.lock": [
       "cto",
       "backend-developer"
+    ],
+    "backtest-bot/.python-version": [
+      "cto"
+    ],
+    "backtest-bot/Makefile": [
+      "cto"
+    ],
+    "backtest-bot/README.md": [
+      "cto",
+      "backend-developer"
+    ],
+    "backtest-bot/config/**": [
+      "cto",
+      "backend-developer"
+    ],
+    "backtest-bot/data/**": [
+      "cto",
+      "backend-developer",
+      "market-analyst"
+    ],
+    "backtest-bot/runs/**": [
+      "cto",
+      "backend-developer",
+      "market-analyst"
+    ],
+    "tests/**": [
+      "cto",
+      "qa-tester"
     ],
     ".python-version": [
       "cto"
@@ -252,22 +280,8 @@
     ".env.example": [
       "cto"
     ],
-    "config/**": [
-      "cto",
-      "backend-developer"
-    ],
-    "data/**": [
-      "cto",
-      "backend-developer",
-      "market-analyst"
-    ],
     "workspaces/*/README.md": [
       "ceo"
-    ],
-    "runs/**": [
-      "cto",
-      "backend-developer",
-      "market-analyst"
     ]
   },
   "message_types": [
@@ -288,7 +302,8 @@
     "courier_exception": "When nested delegation is unavailable, the CEO may carry an executive's work order to a sub-agent and the sub-agent's raw output back. The CEO is transport only: the artifact is written and filed by the owning team in their own workspace, and is not reviewed until that executive reviews it.",
     "cross_team_artifacts": "Anything one team needs from another is published by a bridging executive into specs/ (firm-wide read). Team workspaces are never read across the wall.",
     "halt_notices": "A halt-notice may be posted to any workspace the sender can write, and addressed to any role, bypassing the hierarchy. Stopping is never gated.",
-    "ungoverned_paths": "Every path that decides what code runs has an owner: build and CI files are the CTO's, config is shared with the backend developer, data/** is the sanctioned home for market-data snapshots (analyst and backend write it; it is gitignored, so the audit cannot see it \u2014 evidence must be committed as .md/.json with a checksum). Room README charters are structural and therefore the CEO's, like the registry itself.",
+    "two_codebases": "The repository holds two separate things. The C-suite ORG (agents, rooms, governance, messaging tooling: .claude/, CLAUDE.md, workspaces/, governance/, scripts/, tests/ at the root, docs/org/) and the BACKTESTING BOT product (everything under backtest-bot/, docs in docs/backtest-bot/). The org's shared contract channel, specs/, stays at the root and is read by both. Developers write only under backtest-bot/; the root tests/ are the org tooling's own tests.",
+    "ungoverned_paths": "Every path that decides what code runs has an owner: build and CI files are the CTO's, backtest-bot/config is shared with the backend developer, backtest-bot/data/** is the sanctioned home for market-data snapshots (analyst and backend write it; it is gitignored, so the audit cannot see it \u2014 evidence must be committed as .md/.json with a checksum). Room README charters are structural and therefore the CEO's, like the registry itself.",
     "foundation": "`.claude/foundation.md` carries the mandate, the nine firm-wide rules and the messaging rules in one copy. It is NOT auto-loaded by the harness \u2014 only CLAUDE.md is \u2014 so CLAUDE.md instructs every agent to read it, and the safety-critical rules stay inline in CLAUDE.md as well, because an unfollowed read instruction on those costs money."
   }
 }

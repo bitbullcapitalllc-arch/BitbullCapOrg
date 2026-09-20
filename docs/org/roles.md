@@ -14,10 +14,10 @@ Every role now carries the firm mandate — *build profitable strategies that ca
 | `backend-developer` | engineering | cto, frontend, qa | Engine, market data, risk layer in code, backtest engine, APIs | Invent spec behavior; put secrets in the repo; default to live |
 | `frontend-developer` | engineering | cto, backend, qa | Monitoring, dashboards, review screens, control surfaces | Show placeholder data as live; hide the paper/live distinction |
 | `qa-tester` | engineering | cto, backend, frontend | Test strategy, validation, release verdict | Pass with an open blocker; weaken or skip a test to get green |
-| `clo` | exec, legal | ceo, cfo, cto |
-| `cost-optimizer` | finance | cfo, market-analyst, trader | Token and operational cost analysis, savings proposals | Write outside the finance room; implement without CFO approval | Entity, registration, market conduct, compliance, contracts, data rights | Replace outside counsel; blur law and judgment |
+| `clo` | exec, legal | ceo, cfo, cto | Entity, registration, market conduct, compliance, contracts, data rights | Replace outside counsel; blur law and judgment |
+| `cost-optimizer` | finance | cfo, market-analyst, trader | Token and operational cost analysis, savings proposals | Write outside the finance room; implement without CFO approval |
 
-Channels are symmetric: a role not listed has no channel in either direction. `scripts/msg.py routes --role <role>` prints this live; `docs/workspaces.md` explains why the walls are there.
+Channels are symmetric: a role not listed has no channel in either direction. `scripts/msg.py routes --role <role>` prints this live; `docs/org/workspaces.md` explains why the walls are there.
 
 ## Deliverables
 
@@ -32,7 +32,7 @@ Each role returns a structured report, defined in its agent file:
 - **qa-tester → CTO**: coverage, commands with actual output, risk-control results, determinism, findings by severity, residual risk, verdict.
 - **CLO → CEO**: position, analysis with basis labelled, jurisdictions, conditions, prohibitions, residual risk, outside-counsel need.
 
-## The rules that bind all nine
+## The rules that bind every role
 
 1. No fabricated numbers — measured, sourced, or labelled an estimate.
 2. Paper before live; paper by default.
@@ -44,4 +44,4 @@ Each role returns a structured report, defined in its agent file:
 8. Stay in your room — write only where you may, speak only to your channels.
 9. Cheapest falsifying experiment first.
 
-Full text in `CLAUDE.md`. Workspace rules in `docs/workspaces.md`; messaging in `docs/communication-protocol.md`.
+Full text in `CLAUDE.md`. Workspace rules in `docs/org/workspaces.md`; messaging in `docs/org/communication-protocol.md`.

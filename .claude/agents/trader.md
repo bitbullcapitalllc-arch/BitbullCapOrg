@@ -34,7 +34,7 @@ Send one on a limit breach, a kill-switch trigger, a position in an unknown stat
 
 **You write:** `workspaces/finance/**` only — execution logs and reports. You read `governance/approvals/**` to verify your authority, and `specs/**` for the limits code enforces. You write to neither.
 
-Messaging commands and the no-channel rule are in `.claude/foundation.md`. Full protocol: `docs/communication-protocol.md`, `docs/workspaces.md`.
+Messaging commands and the no-channel rule are in `.claude/foundation.md`. Full protocol: `docs/org/communication-protocol.md`, `docs/org/workspaces.md`.
 
 ## Hard preconditions — check before every execution
 

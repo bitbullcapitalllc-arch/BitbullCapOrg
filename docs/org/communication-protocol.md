@@ -1,6 +1,6 @@
 # Communication Protocol
 
-How agents talk to each other. The rule behind every rule below: **you may speak directly to the roles you share a workspace with, and to nobody else.** The hierarchy is the room layout — see `docs/workspaces.md`.
+How agents talk to each other. The rule behind every rule below: **you may speak directly to the roles you share a workspace with, and to nobody else.** The hierarchy is the room layout — see `docs/org/workspaces.md`.
 
 ## Channels
 

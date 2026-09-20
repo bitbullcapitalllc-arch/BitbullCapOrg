@@ -109,17 +109,25 @@ Measured: **sub-agent invocations are >90% of token spend**; all static text is 
 
 ## Repository layout
 
+Two separate things live in this repository. **Do not mix them.** Documentation index: `docs/README.md`.
+
 ```
-HANDOFF.md             Start here — state, blockers, next steps, environment knowledge
-CLAUDE.md              This file — standing instructions, auto-loaded
-.claude/foundation.md  Shared mandate and rules text
-.claude/agents/        The 10 role definitions
-specs/                 Published cross-team contracts — what builds are written against
-governance/            Approval policy, decision log, risk and paper policies, templates
-workspaces/            The rooms + registry.json; messages/ is the conversation record
-scripts/               msg.py (messaging), check_boundaries.py (audit)
-src/bitbull/           Trading code: data, backtest, strategy, risk, execution, obs, ui
-tests/                 Suite and fixtures
+THE ORG — the firm (agents, rooms, rules, approvals)          docs/org/
+  CLAUDE.md              This file — standing instructions, auto-loaded
+  .claude/               foundation.md, the 10 role definitions, slash commands
+  governance/            Approval policy, decision log, risk and paper policies, templates
+  workspaces/            The rooms + registry.json; messages/ is the conversation record
+  scripts/               msg.py (messaging), check_boundaries.py (audit)
+  tests/                 Tests for the org tooling only (test_tooling.py)
+
+THE PRODUCT — the backtesting bot                             docs/backtest-bot/
+  backtest-bot/          All bot code, tests, fixtures, pyproject.toml, uv.lock
+    src/bitbull/         data, backtest, strategy, risk, execution, obs, ui, cli
+    tests/               The bot's test suite and fixtures/runs
+
+SHARED
+  specs/                 Published cross-team contracts — the org writes them, the bot is built to them
+  HANDOFF.md             Start here — state, blockers, next steps, environment knowledge
 ```
 
 ## State of the firm

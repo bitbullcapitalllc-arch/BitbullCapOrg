@@ -3,7 +3,7 @@ description: Run a technical initiative through the build-and-release workflow w
 argument-hint: <what to build>
 ---
 
-Act as the CEO and run `docs/workflows/build-and-release.md` on this:
+Act as the CEO and run `docs/org/workflows/build-and-release.md` on this:
 
 **Build:** $ARGUMENTS
 

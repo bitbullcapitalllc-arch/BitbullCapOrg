@@ -24,7 +24,7 @@ Dispatch as messages, not only in conversation, so the ask is on the record in t
 scripts/msg.py new --from ceo --to cfo --type work-order --re "<ask>" --needs-by <date> --body-file <file>
 ```
 
-The CEO has channels to the `cfo`, `cto` and `clo` only. Work for an analyst, trader or developer is requested from their executive — and if nested delegation is unavailable, the CEO may act as courier under the rules in `docs/workspaces.md`, carrying the executive's work order without taking ownership of the output.
+The CEO has channels to the `cfo`, `cto` and `clo` only. Work for an analyst, trader or developer is requested from their executive — and if nested delegation is unavailable, the CEO may act as courier under the rules in `docs/org/workspaces.md`, carrying the executive's work order without taking ownership of the output.
 
 ## 4. Collect and challenge
 

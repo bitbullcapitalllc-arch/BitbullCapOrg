@@ -72,8 +72,9 @@ Mark such a work order with the courier note in `workspaces/_templates/work-orde
 | `governance/approvals/**` | `ceo`, `cfo`, `cto`, `clo` *(each signs only their own line)* |
 | `workspaces/<room>/**` | that room's members |
 | `scripts/**` | `cto` |
-| `src/**` | `cto`, `backend-developer`, `frontend-developer` |
-| `tests/**` | `cto`, `qa-tester`, `backend-developer`, `frontend-developer` |
+| `backtest-bot/src/**` | `cto`, `backend-developer`, `frontend-developer` |
+| `backtest-bot/tests/**` | `cto`, `qa-tester`, `backend-developer`, `frontend-developer` |
+| `tests/**` (org tooling tests) | `cto`, `qa-tester` |
 
 The **founder** is unrestricted.
 
@@ -96,4 +97,4 @@ Run the audit before committing a session's work. A violation is a finding, not 
 
 ## Changing the boundaries
 
-`workspaces/registry.json` is CEO-only, and a change to it is a change to the firm's structure: it goes in `governance/decision-log.md`. Adding a role means adding it to the registry, writing `.claude/agents/<role>.md`, and updating `CLAUDE.md` and `docs/org-chart.md` in the same change.
+`workspaces/registry.json` is CEO-only, and a change to it is a change to the firm's structure: it goes in `governance/decision-log.md`. Adding a role means adding it to the registry, writing `.claude/agents/<role>.md`, and updating `CLAUDE.md` and `docs/org/org-chart.md` in the same change.

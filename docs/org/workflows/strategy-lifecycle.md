@@ -85,7 +85,7 @@ From an idea to live capital. Every stage has an owner and an exit condition; a 
 
 ## The message trail
 
-Each stage is a message on the record, in the workspace the two parties share (`docs/communication-protocol.md`):
+Each stage is a message on the record, in the workspace the two parties share (`docs/org/communication-protocol.md`):
 
 | Stage | Message |
 |---|---|

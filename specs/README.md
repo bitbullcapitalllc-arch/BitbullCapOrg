@@ -30,3 +30,17 @@ That makes the crossing visible and versioned. An executive who publishes here i
 - **Tight enough to be testable.** Exact formulas, explicit edge-case and tie-break behavior, expected outputs on known inputs. An ambiguity here becomes a guess in a trading rule.
 - **Ambiguity goes back through the bridge.** A developer who finds a gap asks the CTO, who asks the CFO, who asks the analyst. Nobody reaches across the wall to "just ask".
 - **No secrets, ever** — no credentials, keys or account numbers.
+
+## Index — which side of the repository each spec serves
+
+`specs/` is the one folder shared by the org and the backtesting bot. Paths inside the specs, such as `src/bitbull/…`, are relative to `backtest-bot/`. Documentation: [`docs/org/`](../docs/org/README.md) and [`docs/backtest-bot/`](../docs/backtest-bot/README.md).
+
+| Spec | Published by | Serves |
+|---|---|---|
+| `2026-09-13-firm-mandate-v1` | `ceo` | **Org** — mandate, the four venues, decision heuristics. Read by every agent |
+| `2026-09-13-cost-and-fill-model-v1` | `cfo` | **Bot** — the fee, slippage, fill and latency model; every venue-sourced value `unset` |
+| `2026-09-13-bar-data-backtest-annex-v1` | `cfo` | **Bot** — how that model applies to OHLCV-only data |
+| `2026-09-13-ema-crossover-btc-1h-rules-and-dashboard-v1` | `cfo` | **Bot** — strategy rules, research protocol, metrics, gates, dashboard requirements |
+| `2026-09-13-backtest-engine-contract-v1` | `cto` | **Bot** — engine architecture, time, determinism, risk gate, manifest |
+| `2026-09-13-run-output-contract-v1` | `cto` | **Bot** — what a run writes to disk |
+| `2026-09-13-bar-ingestion-and-run-fields-v1` | `cto` | **Bot** — bar-data ingestion, extra run fields, `sweep.json`, holdout-touch ledger |

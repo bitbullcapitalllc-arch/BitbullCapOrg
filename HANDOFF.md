@@ -119,15 +119,21 @@ CLAUDE.md              Charter — auto-loaded every session. Slim by design.
 .claude/agents/*.md    The 10 role definitions
 HANDOFF.md             This file
 specs/                 7 published cross-team contracts — the source of truth for builds
-governance/            approval-policy, decision-log (10 entries), risk + paper policies, templates
+governance/            approval-policy, decision-log, risk + paper policies, templates
 workspaces/            The rooms: exec, finance, engineering, legal, founder + registry.json
   */messages/          32 inter-agent messages — the conversation record
   */work/              Working notes, assessments, build logs
 scripts/msg.py         Messaging (send, reply, inbox, routes, close)
 scripts/check_boundaries.py   Boundary audit
-src/bitbull/           The trading code (see state below)
-tests/                 Test suite + fixtures
+tests/                 Tests for the org tooling only
+backtest-bot/          THE PRODUCT — all bot code, tests and fixtures (own pyproject.toml / uv.lock)
+  src/bitbull/         The trading code (see state below)
+  tests/               The bot's test suite + fixtures/runs
+docs/org/              Documentation for the organisation
+docs/backtest-bot/     Documentation for the bot: architecture, data flow, status
 ```
+
+The org and the bot are separate codebases in one repository. Paths in the specs (e.g. `src/bitbull/…`) are relative to `backtest-bot/`.
 
 **To read the firm's history:** `workspaces/*/messages/` in filename order, and `governance/decision-log.md` for why each decision was made and what would reverse it.
 
@@ -139,16 +145,16 @@ Verified at commit `6427368`:
 
 | Component | State |
 |---|---|
-| `src/bitbull/data/` | **Real** — 795 lines. OHLCV loader, manifest, checksums, full refusal set |
-| `src/bitbull/ui/` | **Real** — 438 lines. Dashboard shell: provenance header, synthetic overlay, static HTML renderer |
-| `src/bitbull/backtest/` | **Skeleton** — 77 lines. No event loop yet |
-| `src/bitbull/strategy/` | **Skeleton** — 62 lines. **No EMA computation yet** |
-| `src/bitbull/risk/` `execution/` `obs/` | **Skeletons** — 24 / 36 / 34 lines |
-| Test suite | **148 passed, 8 failed** |
+| `backtest-bot/src/bitbull/data/` | **Real** — 795 lines. OHLCV loader, manifest, checksums, full refusal set |
+| `backtest-bot/src/bitbull/ui/` | **Real** — 438 lines. Dashboard shell: provenance header, synthetic overlay, static HTML renderer |
+| `backtest-bot/src/bitbull/backtest/` | **Skeleton** — 77 lines. No event loop yet |
+| `backtest-bot/src/bitbull/strategy/` | **Skeleton** — 62 lines. **No EMA computation yet** |
+| `backtest-bot/src/bitbull/risk/` `execution/` `obs/` | **Skeletons** — 24 / 36 / 34 lines |
+| Test suite | Handoff author reported 148 passed / 8 failed. **Re-measured 2026-09-20 on a fresh clone: 98 passed / 14 failed** — the same 8 tooling failures plus 6 bot tests that fail because `backtest-bot/src/bitbull/data/` (the loader) was never committed: a bare `data/` rule in `.gitignore` ignored it. `.gitignore` is now anchored; **the loader source itself still has to be recovered from the original environment** (see `docs/backtest-bot/status-and-roadmap.md`) |
 
-**The 8 failures are expected.** They are in `tests/test_tooling.py` and test the CTO's half-finished `msg.py` refactor, which the CEO reverted after QA found it corrupted a work order on every reply. They go green only when the CTO finishes that migration. **No build round may add new red beyond these 8.**
+**The 8 tooling failures are expected.** They are in `tests/test_tooling.py` and test the CTO's half-finished `msg.py` refactor, which the CEO reverted after QA found it corrupted a work order on every reply. They go green only when the CTO finishes that migration. **No build round may add new red beyond the known set (8 tooling + 6 missing-loader).**
 
-Run it yourself: `uv run --frozen pytest -q`
+Run it yourself: bot tests `cd backtest-bot && uv run --frozen pytest -q`; org tooling tests `python -m pytest tests/test_tooling.py -q` from the repo root (set `PYTHONUTF8=1` on Windows).
 
 ### The EMA initiative (the live piece of work)
 
@@ -242,15 +248,17 @@ git clone https://github.com/bitbullcapitalllc-arch/BitbullCapOrg.git
 cd BitbullCapOrg
 git checkout claude/bitbull-capital-org-structure-eiiv8c
 
-# Python 3.11 + uv (uv 0.8.17, Python 3.11.15 used here)
+# The bot is its own codebase: Python 3.11 + uv (uv 0.8.17 / Python 3.11.15 used originally)
+cd backtest-bot
 uv sync --frozen
-uv run --frozen pytest -q          # expect: 148 passed, 8 failed (the known tooling 8)
+uv run --frozen pytest -q          # currently 55 passed, 6 failed (the missing data loader)
 
 # Render the dashboard against the fixtures
 uv run --frozen python -m bitbull.ui.dash_cli tests/fixtures/runs /tmp/dashout
 open /tmp/dashout/*.html           # three pages: running, completed, cost-refused
+cd ..
 
-# Org tooling (no dependencies, stdlib only)
+# Org tooling (no dependencies, stdlib only) — from the repo root
 python3 scripts/check_boundaries.py --audit
 python3 scripts/msg.py routes --role cfo
 python3 scripts/msg.py inbox --role ceo
@@ -264,7 +272,7 @@ Then start Claude Code in the repo root. `CLAUDE.md` loads automatically and poi
 
 1. Read `CLAUDE.md` and `.claude/foundation.md` (together ~5 minutes).
 2. Read this file's §6, §7 and §8 — state, blockers, next steps.
-3. Run `python3 scripts/check_boundaries.py --audit` and `uv run --frozen pytest -q` so you know the state rather than trusting this document.
+3. Run `python3 scripts/check_boundaries.py --audit` and `cd backtest-bot && uv run --frozen pytest -q` so you know the state rather than trusting this document.
 4. Check `scripts/msg.py inbox --role ceo` for anything open.
 5. Start Batch 1 of §8.
 

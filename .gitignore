@@ -11,28 +11,33 @@ config.local.*
 # Trading/runtime output that must not live in the repo
 logs/
 *.log
-data/
+# Market-data snapshots. ANCHORED to the two data roots on purpose: a bare `data/`
+# matches a directory of that name at any depth and silently ignored the source
+# package backtest-bot/src/bitbull/data/ (the OHLCV loader), so it never reached git.
+/data/
+/backtest-bot/data/
 *.csv
 *.parquet
 
 # ...but golden test fixtures are evidence, not output, and must be committed
-# (CTO finding S2: `git add tests/fixtures/x.csv` silently added nothing)
-!tests/fixtures/**
+# (CTO finding S2: `git add tests/fixtures/x.csv` silently added nothing).
+# `**/` covers both test roots: tests/ (org tooling) and backtest-bot/tests/ (the bot).
+!**/tests/fixtures/**
 
 # ...and the negation above must not re-open the secrets hole (QA finding F1):
 # later rules win, so re-ignore credential-shaped names inside fixtures too
-tests/fixtures/**/.env
-tests/fixtures/**/.env.*
-tests/fixtures/**/*.pem
-tests/fixtures/**/*.key
-tests/fixtures/**/credentials*
-tests/fixtures/**/secrets*
-tests/fixtures/.env
-tests/fixtures/.env.*
-tests/fixtures/*.pem
-tests/fixtures/*.key
-tests/fixtures/credentials*
-tests/fixtures/secrets*
+**/tests/fixtures/**/.env
+**/tests/fixtures/**/.env.*
+**/tests/fixtures/**/*.pem
+**/tests/fixtures/**/*.key
+**/tests/fixtures/**/credentials*
+**/tests/fixtures/**/secrets*
+**/tests/fixtures/.env
+**/tests/fixtures/.env.*
+**/tests/fixtures/*.pem
+**/tests/fixtures/*.key
+**/tests/fixtures/credentials*
+**/tests/fixtures/secrets*
 
 # Python / Node / editor noise
 __pycache__/
@@ -42,5 +47,6 @@ venv/
 node_modules/
 dist/
 build/
+.pytest_cache/
 .DS_Store
 .ipynb_checkpoints/

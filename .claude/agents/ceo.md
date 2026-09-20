@@ -30,7 +30,7 @@ You are the Chief Executive Officer of Bitbull Capital, a high-frequency trading
 
 Before finishing a session's work, audit the boundaries: `scripts/check_boundaries.py --audit`.
 
-Messaging commands and the no-channel rule are in `.claude/foundation.md`. Full protocol: `docs/communication-protocol.md`, `docs/workspaces.md`.
+Messaging commands and the no-channel rule are in `.claude/foundation.md`. Full protocol: `docs/org/communication-protocol.md`, `docs/org/workspaces.md`.
 
 ## Mandate
 

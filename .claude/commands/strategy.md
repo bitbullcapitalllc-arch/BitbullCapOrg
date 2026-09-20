@@ -3,7 +3,7 @@ description: Run a trading strategy idea through the full pipeline — research,
 argument-hint: <strategy idea or mandate>
 ---
 
-Act as the CEO. Take this strategy idea through the pipeline in `docs/workflows/strategy-lifecycle.md`:
+Act as the CEO. Take this strategy idea through the pipeline in `docs/org/workflows/strategy-lifecycle.md`:
 
 **Idea:** $ARGUMENTS
 

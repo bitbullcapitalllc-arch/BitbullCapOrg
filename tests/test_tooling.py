@@ -121,21 +121,21 @@ class TestS1StagedChangesAreChecked(ToolingCase):
 
     def test_staged_changes_are_not_a_silent_pass(self):
         self.write("CLAUDE.md", "# edited by a role that may not touch it\n")
-        self.write("src/sneaky.py", "print('hello')\n")
+        self.write("backtest-bot/src/sneaky.py", "print('hello')\n")
         self.git("add", "-A")
         r = self.boundaries("--role", "qa-tester")
         self.assertNotIn("no changes to check", r.stdout)
         self.assertIn("CLAUDE.md", r.stdout)
-        self.assertIn("src/sneaky.py", r.stdout)
+        self.assertIn("backtest-bot/src/sneaky.py", r.stdout)
         self.assertNotEqual(r.returncode, 0, r.stdout)
 
     def test_staged_unstaged_and_untracked_are_checked_together(self):
-        self.write("src/engine.py", "x = 1\n")
-        self.git("add", "src/engine.py")                              # staged
+        self.write("backtest-bot/src/engine.py", "x = 1\n")
+        self.git("add", "backtest-bot/src/engine.py")                              # staged
         self.write("workspaces/engineering/work/note.md", "edited\n")  # unstaged
         self.write("workspaces/engineering/work/new.md", "new\n")      # untracked
         r = self.boundaries("--role", "cto")
-        for path in ("src/engine.py",
+        for path in ("backtest-bot/src/engine.py",
                      "workspaces/engineering/work/note.md",
                      "workspaces/engineering/work/new.md"):
             self.assertIn(path, r.stdout)
@@ -143,11 +143,11 @@ class TestS1StagedChangesAreChecked(ToolingCase):
         self.assertEqual(r.returncode, 0, r.stdout)
 
     def test_staged_flag_still_narrows_to_staged(self):
-        self.write("src/engine.py", "x = 1\n")
-        self.git("add", "src/engine.py")
+        self.write("backtest-bot/src/engine.py", "x = 1\n")
+        self.git("add", "backtest-bot/src/engine.py")
         self.write("workspaces/engineering/work/new.md", "new\n")
         r = self.boundaries("--role", "cto", "--staged")
-        self.assertIn("src/engine.py", r.stdout)
+        self.assertIn("backtest-bot/src/engine.py", r.stdout)
         self.assertNotIn("workspaces/engineering/work/new.md", r.stdout)
         self.assertEqual(r.returncode, 0, r.stdout)
 
@@ -330,8 +330,8 @@ class TestUngovernedPaths(ToolingCase):
         self.assertEqual(r.returncode, 0, r.stdout)
 
     def test_build_and_ci_paths_are_now_governed(self):
-        for rel in ("pyproject.toml", "uv.lock", ".github/workflows/ci.yml",
-                    "config/backtest.yml", "Makefile", ".python-version"):
+        for rel in ("backtest-bot/pyproject.toml", "backtest-bot/uv.lock", ".github/workflows/ci.yml",
+                    "backtest-bot/config/backtest.yml", "Makefile", ".python-version"):
             self.write(rel, "x\n")
         r = self.boundaries("--role", "cto")
         self.assertNotIn("UNGOVERNED", r.stdout)
@@ -380,20 +380,20 @@ class TestGitignoredPaths(ToolingCase):
 
     def test_include_ignored_sees_governed_output(self):
         self.write("workspaces/engineering/scratch.csv", "a,b\n1,2\n")
-        self.write("data/BTC-USD/2026-09-13.parquet", "binary-ish\n")
+        self.write("backtest-bot/data/BTC-USD/2026-09-13.parquet", "binary-ish\n")
         r = self.boundaries("--role", "market-analyst", "--include-ignored")
         self.assertIn("workspaces/engineering/scratch.csv", r.stdout)
-        self.assertIn("data/BTC-USD/2026-09-13.parquet", r.stdout)
+        self.assertIn("backtest-bot/data/BTC-USD/2026-09-13.parquet", r.stdout)
         self.assertIn("ignored by git", r.stdout)
 
     def test_include_ignored_does_not_drown_in_build_noise(self):
         self.write("__pycache__/msg.cpython-311.pyc", "noise\n")
         self.write("logs/run.log", "noise\n")
-        self.write("data/BTC-USD/2026-09-13.parquet", "signal\n")
+        self.write("backtest-bot/data/BTC-USD/2026-09-13.parquet", "signal\n")
         r = self.boundaries("--role", "market-analyst", "--include-ignored")
         self.assertNotIn("__pycache__", r.stdout)
         self.assertNotIn("logs/run.log", r.stdout)
-        self.assertIn("data/BTC-USD/2026-09-13.parquet", r.stdout)
+        self.assertIn("backtest-bot/data/BTC-USD/2026-09-13.parquet", r.stdout)
 
     def test_ignored_output_outside_the_room_can_be_pinned_down(self):
         self.write("workspaces/engineering/scratch.csv", "a,b\n1,2\n")

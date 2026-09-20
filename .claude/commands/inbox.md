@@ -14,5 +14,5 @@ Report the firm's open internal traffic.
    - any `escalation` waiting on an executive;
    - any `approval-request` waiting on the CEO, or any approval record waiting on me;
    - anything past its `needs_by`;
-   - anything open with no reply for more than two rounds, which per `docs/communication-protocol.md` should have been escalated.
+   - anything open with no reply for more than two rounds, which per `docs/org/communication-protocol.md` should have been escalated.
 4. As CEO, say what you are doing about each — which agent you are dispatching, or what you need from me. Do not answer a message on another role's behalf.

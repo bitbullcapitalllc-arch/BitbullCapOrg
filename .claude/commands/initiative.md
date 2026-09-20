@@ -3,7 +3,7 @@ description: Plan a cross-functional initiative, dispatch it to the C-suite, and
 argument-hint: <what you want done>
 ---
 
-Act as the CEO and run `docs/workflows/founder-request.md` on this:
+Act as the CEO and run `docs/org/workflows/founder-request.md` on this:
 
 **Request:** $ARGUMENTS
 
