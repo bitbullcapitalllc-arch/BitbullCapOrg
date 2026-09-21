@@ -64,13 +64,16 @@ flowchart TB
 | ID | Requirement | Status |
 |---|---|---|
 | F1.1 | Persistent provenance header on every view | **BUILT** |
-| F1.2 | Non-dismissible synthetic overlay across the chart area | **BUILT** (over a labelled placeholder; wiring to a real chart is mechanical once F1.6 exists) |
+| F1.2 | Non-dismissible synthetic overlay across the chart area | **BUILT** (Round A's labelled placeholder box was removed in Round B; the overlay now sits over the results and heatmap areas. **No real chart exists yet** — see F1.6) |
 | F1.3 | Fake-cash labelling | **BUILT** — see open question below |
 | F1.4 | Mandated body text, including the latency warning | **BUILT** (the cost-model sentence is a labelled *paraphrase* of the CTO's work-order gloss, because the spec's exact §13.2 text was outside that build's reading list) |
-| F1.5 | Designed "no cost model → no net result" view listing `unset_parameters` | **NOT STARTED** |
-| F1.6 | Results view: gross and net on the same axes at the same scale, both brackets together, break-even `k_bar` and round-trip bps beside any headline, `null` as "n/a" with reason code, the three-part bar attribution | **NOT STARTED** |
-| F1.7 | Parameter explorer (below) | **NOT STARTED** |
-| — | `report.md` renderer (pure function over `run.json`, no engine access) and the alert-digest format | **NOT STARTED** |
+| F1.5 | Designed "no cost model → no net result" view listing `unset_parameters` | **BUILT, UNREVIEWED** — `ui/cost_state.py` |
+| F1.6 | Results view: gross and net on the same axes at the same scale, both brackets together, break-even `k_bar` and round-trip bps beside any headline, `null` as "n/a" with reason code, the three-part bar attribution | **PARTIAL, UNREVIEWED** — `ui/results.py`. Everything except the visual: **gross and net are adjacent rows in a table, not a chart on shared axes**, and there is **no equity-curve chart at all**. Blocked on a CTO ruling on whether chart geometry is exempt from the no-arithmetic boundary test, and on the `polars` dependency for reading the series Parquet |
+| F1.7 | Parameter explorer (below) | **BUILT, UNREVIEWED** — `ui/explorer.py`. **Its inline JavaScript has never been executed** — no browser or Node exists in this environment. Tests cover DOM structure and the no-JS fallback (every value is also in the static table); the show/hide, click and keyboard handlers are unexercised. It cannot launch a new exploratory run — it looks up precomputed cells in `sweep.json`, and nothing yet produces one |
+| — | `report.md` renderer (pure function over `run.json`, no engine access) | **BUILT, UNREVIEWED** — `ui/report_md.py`. Open: who calls `write_report_md(run_dir)` at run finish, given the engine must not import `bitbull.ui` |
+| — | Alert-digest format | **NOT STARTED** |
+
+**Round B is unreviewed.** F1.5–F1.7 and the `report.md` renderer are in the repository because the founder directed that everything be pushed together; the CTO review is Batch 3 and has not happened. Nothing downstream may treat the field names this code reads (`n`, `ci_low`, `ci_high`, `unset_parameters`, `plateau_mask`, `null_band`) as ratified contract — several come from the hand-authored fixtures only. Build log and the seven open questions for the CTO: `workspaces/engineering/work/2026-09-20-frontend-f15-f17-build-log.md`.
 
 ## 6. The parameter explorer (F1.7) — governance of the founder's own search
 

@@ -87,9 +87,11 @@ git rev-parse HEAD                            # record it in the verdict
 
 | Suite | Known failures | Cause |
 |---|---|---|
-| Bot | 6 — `test_import_graph` (2), `test_no_float_money` (4) | The data loader was never committed. **Removed from this list the moment the loader lands** |
+| Bot | **0** — every test in `backtest-bot/tests/` must pass | The 6 that used to sit here (`test_import_graph` ×2, `test_no_float_money` ×4) were the missing data loader. The loader was recovered on 2026-09-20 and they went green, so they are struck from this list exactly as it required. **Any bot failure is now a blocker** |
 | Org tooling | 8 — `TestS3FrontmatterParsing` (4), `TestGitignoredPaths` (2: `include_ignored_*`), `TestExistingBehaviourPreserved` (2) | Unfinished `msg.py` migration (6); ignored-path audit lists a collapsed directory (2) |
 | Push gate | 0 — all 63 tests in `tests/test_push_gate.py` must pass | — |
+
+A passing count is not on this list and is not a substitute for it: QA records the counts it measured, and compares only the **failures** against this table. The working-tree counts current at the time of writing (2026-09-20) are bot 231/0, org tooling 43/8, push gate 63/0 — but the count QA reports is the one QA measured from a fresh clone, never one copied from here.
 
 **Verdict** — one of: `PASS`, `PASS WITH NOTED RISK` (each risk named), `FAIL`, or `COULD NOT VERIFY` (say which check could not be run and why). Pressure and deadlines do not change the verdict; only evidence does. No `PASS` with an open blocker, a failing test outside the known set, or a check that was not executed.
 

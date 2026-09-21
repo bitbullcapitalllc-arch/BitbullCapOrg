@@ -14,7 +14,7 @@ Three facts to hold in mind before reading anything else:
 
 1. **Two blockers stop any result, and neither is an engineering task.** No venue has been chosen, so every cost parameter is `unset` and the engine refuses to construct. And no BTC dataset exists. A perfect one-year CSV arriving tomorrow would still produce *"no cost model available — no net result exists"* — that is correct behaviour, not a bug.
 2. **One year of hourly data on one instrument cannot prove an edge.** The CFO calculated the standard error of an annualized Sharpe on ~2,090 tradeable holdout bars at about **2.05**, so a measured 1.5 spans roughly [−2.5, +5.5]. The deliverable is a validated pipeline and a defensible "no edge found", not a headline Sharpe. See [`methodology.md`](methodology.md).
-3. **Most of the engine is not built yet.** Only the data loader (whose source is missing from the repo) and the dashboard's Round A exist. See [`status-and-roadmap.md`](status-and-roadmap.md).
+3. **Most of the engine is not built yet.** What exists: the data loader (recovered into the repository 2026-09-20), the dashboard's Round A, and the dashboard's Round B — the last of which is **committed but unreviewed**, with the explorer's JavaScript never executed and no equity-curve chart. Everything between the loader and the dashboard — event loop, risk gate, fill simulator, EMA computation, metrics — is a skeleton. See [`status-and-roadmap.md`](status-and-roadmap.md).
 
 ## Document map
 

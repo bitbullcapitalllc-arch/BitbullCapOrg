@@ -43,7 +43,7 @@ Fake cash, backtest only. **Nothing in it can place an order or reach a venue.**
 ```bash
 cd backtest-bot
 uv sync --frozen                                   # Python 3.11, pinned dependencies
-uv run --frozen pytest -q                          # 55 passed, 6 failed — see status doc (loader missing)
+uv run --frozen pytest -q                          # measured 2026-09-20: 231 passed, 0 failed
 uv run --frozen python -m bitbull.ui.dash_cli tests/fixtures/runs /tmp/dashout
 ```
 

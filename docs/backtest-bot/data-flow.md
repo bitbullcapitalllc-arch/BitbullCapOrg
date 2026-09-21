@@ -6,7 +6,7 @@ How a file of hourly bars becomes a reviewed result. Every stage names the spec 
 
 ```mermaid
 flowchart TD
-    A["1 · Snapshot + sidecar on disk<br/>OHLCV file and meta.json"] --> B{"2 · Ingestion checks<br/>BUILT, NOT IN REPO"}
+    A["1 · Snapshot + sidecar on disk<br/>OHLCV file and meta.json"] --> B{"2 · Ingestion checks<br/>BUILT"}
     B -- "any hard refusal" --> X1(["Run refused<br/>reason_code, never repaired"])
     B -- "clean" --> C["3 · Bar events<br/>available_at = open + interval"]
     C --> D["4 · Event queue<br/>ordered by available_at, kind, source_seq<br/>SKELETON"]
@@ -22,7 +22,7 @@ flowchart TD
     J --> K["11 · Run writer<br/>run.json atomic, Parquet series"]
     K --> L["12 · Sweep, null band, plateau<br/>sweep.json"]
     K --> M["13 · report.md<br/>rendered from run.json only"]
-    K --> N["14 · Static HTML dashboard<br/>ui/ BUILT, Round A"]
+    K --> N["14 · Static HTML dashboard + report.md<br/>ui/ Round A BUILT, Round B UNREVIEWED"]
     L --> N
     M --> P(["15 · Review<br/>owning executive, CEO, founder"])
     N --> P

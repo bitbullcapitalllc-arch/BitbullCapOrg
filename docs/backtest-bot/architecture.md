@@ -47,13 +47,13 @@ flowchart LR
 ```mermaid
 flowchart TB
     subgraph PKG["src/bitbull"]
-        DATA["data/<br/>loader, manifest, schema, errors<br/><b>BUILT, NOT IN REPO</b>"]
+        DATA["data/<br/>loader, manifest, schema, errors<br/><b>BUILT</b>"]
         BT["backtest/<br/>event queue, clock, runner,<br/>run writer, replay<br/><b>SKELETON</b>"]
         STRAT["strategy/<br/>Strategy interface: BUILT<br/>EMA crossover: NOT STARTED"]
         RISK["risk/<br/>RiskGate<br/><b>SKELETON</b>"]
         EXEC["execution/<br/>FillSimulator, SimulatedVenue<br/><b>SKELETON</b>"]
         OBS["obs/<br/>AlertSink, heartbeat<br/><b>SKELETON</b>"]
-        UI["ui/<br/>static HTML renderer<br/><b>BUILT, Round A</b>"]
+        UI["ui/<br/>static HTML renderer + report.md<br/><b>Round A BUILT · Round B UNREVIEWED</b>"]
         CLI["cli/<br/>entry points<br/><b>SKELETON</b>"]
     end
 
@@ -73,13 +73,13 @@ flowchart TB
 
 | Package | Status | Responsibility | Governing spec |
 |---|---|---|---|
-| `data/` | **BUILT, NOT IN REPO** | Streaming OHLCV reader; sidecar validation; sha256 verified on every read; every hard refusal is its own exception with a stable `reason_code`; money as `Decimal`; default-deny source classification | engine §5; ingestion §2 |
+| `data/` | **BUILT** | Streaming OHLCV reader; sidecar validation; sha256 verified on every read; every hard refusal is its own exception with a stable `reason_code`; money as `Decimal`; default-deny source classification. Recovered into the repository 2026-09-20 | engine §5; ingestion §2 |
 | `backtest/` | **SKELETON** | Event queue with the four-part key, clock, runner wiring intent → gate → venue, atomic run writer, replay | engine §2, §6, §10, §12; run-output §2 |
 | `strategy/` | interface **BUILT**; EMA **NOT STARTED** | `Strategy` ABC (`on_event`, `on_fill`, `on_reject`, `on_timer`, `state_hash`). No I/O, no clock, no dataset handle | engine §4; rules §5 |
 | `risk/` | **SKELETON** | `RiskGate`: explicit limits with no defaults; the only constructor of `ApprovedOrder`; fail closed | engine §6 |
 | `execution/` | **SKELETON** | `FillSimulator`: refuses to construct with any parameter `unset`; `SimulatedVenue.submit` accepts only an `ApprovedOrder` | engine §7; annex |
 | `obs/` | **SKELETON** | `AlertSink` (file-based JSONL), heartbeat writer, watchdog | engine §13 |
-| `ui/` | **BUILT** (Round A only) | Pure functions from a parsed `run.json` to HTML; no metric computation | rules §9; run-output §6 |
+| `ui/` | Round A **BUILT**; Round B **BUILT, UNREVIEWED** | Pure functions from a parsed `run.json` to HTML and to `report.md`; no metric computation. Round B (F1.5–F1.7, `report.md` renderer) has not been reviewed by the CTO and has two declared gaps — the explorer's JS has never been executed, and no equity-curve chart exists | rules §9; run-output §6 |
 | `cli/` | **SKELETON** | Entry points | engine §1 |
 
 A skeleton module *raises `NotImplementedError`* rather than returning a placeholder value, so nothing downstream can mistake an unimplemented path for a working one.

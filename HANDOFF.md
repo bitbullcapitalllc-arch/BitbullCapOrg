@@ -148,22 +148,22 @@ Verified 2026-09-20 on a fresh clone, after the org/bot separation (the state ta
 
 | Component | State |
 |---|---|
-| `backtest-bot/src/bitbull/data/` | **Real** — 795 lines. OHLCV loader, manifest, checksums, full refusal set |
-| `backtest-bot/src/bitbull/ui/` | **Real** — 438 lines. Dashboard shell: provenance header, synthetic overlay, static HTML renderer |
+| `backtest-bot/src/bitbull/data/` | **Real, and now in the repository** — 795 lines measured (`wc -l`, excluding `__pycache__`), plus 521 lines of tests. OHLCV loader, manifest, checksums, full refusal set. **Recovered 2026-09-20** from the remote branch `recovery/data-loader` and re-homed under `backtest-bot/` |
+| `backtest-bot/src/bitbull/ui/` | **Real, but UNREVIEWED beyond Round A** — 2,420 lines measured. Round A (F1.1–F1.4) was reviewed; Round B (F1.5–F1.7 + `report.md` renderer) has **not been reviewed by the CTO**, and has two known gaps: the explorer's inline JS has never been executed, and the equity-curve chart is not built. See `docs/backtest-bot/dashboard.md` §5 |
 | `backtest-bot/src/bitbull/backtest/` | **Skeleton** — 77 lines. No event loop yet |
 | `backtest-bot/src/bitbull/strategy/` | **Skeleton** — 62 lines. **No EMA computation yet** |
 | `backtest-bot/src/bitbull/risk/` `execution/` `obs/` | **Skeletons** — 24 / 36 / 34 lines |
-| Test suite | Handoff author reported 148 passed / 8 failed. **Re-measured 2026-09-20 after the push-gate fix (working tree, pending a fresh-clone re-verification): 161 passed / 14 failed** (bot 55/6, org tooling 43/8, push gate 63/0 — the gate suite grew by 12 regression tests; bot and tooling counts unchanged) — the same 8 tooling failures plus 6 bot tests that fail because `backtest-bot/src/bitbull/data/` (the loader) was never committed: a bare `data/` rule in `.gitignore` ignored it. `.gitignore` is now anchored; **the loader source itself still has to be recovered from the original environment** (see `docs/backtest-bot/status-and-roadmap.md`) |
+| Test suite | **Measured 2026-09-20 in the working tree, with the recovered loader and the Round B frontend in place: 337 passed / 8 failed** — bot **231 / 0**, org tooling **43 / 8**, push gate **63 / 0**. The 6 missing-loader failures are **gone**: they were the loader, and the loader is here. Only the 8 known tooling failures remain. Pending a fresh-clone re-verification by QA at each push |
 
-**The 8 tooling failures are expected.** They are in `tests/test_tooling.py` and test the CTO's half-finished `msg.py` refactor, which the CEO reverted after QA found it corrupted a work order on every reply. They go green only when the CTO finishes that migration. **No build round may add new red beyond the known set (8 tooling + 6 missing-loader).**
+**The 8 tooling failures are expected.** They are in `tests/test_tooling.py` and test the CTO's half-finished `msg.py` refactor, which the CEO reverted after QA found it corrupted a work order on every reply. They go green only when the CTO finishes that migration. **The known-red set is now 8 tooling failures and nothing else — no build round may add red beyond it.**
 
-Run it yourself: bot tests `cd backtest-bot && uv run --frozen pytest -q`; org tooling and push-gate tests `python -m pytest tests/test_tooling.py tests/test_push_gate.py -q` from the repo root (set `PYTHONUTF8=1` on Windows).
+Run it yourself: bot tests `cd backtest-bot && uv run --frozen pytest -q`; org tooling and push-gate tests `python -m pytest tests/test_tooling.py tests/test_push_gate.py -q` from the repo root (set `PYTHONUTF8=1` on Windows; on this machine `uv` is not on PATH — use `python -m uv`, and the root `python` has no `pytest`, so use `backtest-bot/.venv/Scripts/python.exe -m pytest` for the org suites).
 
 ### The EMA initiative (the live piece of work)
 
 Founder's spec: **BTC · 1 hour · 1 year · EMA crossover 9 and 20 · fake cash · plus a dashboard where they choose the EMA values.**
 
-Stages 1–7 of the founder's 11-stage chain are complete: strategy rules designed by the analyst, amended and approved by the CFO, approved by the CEO. Round A of the build is done (loader + dashboard shell). Rounds B and C are not.
+Stages 1–7 of the founder's 11-stage chain are complete: strategy rules designed by the analyst, amended and approved by the CFO, approved by the CEO. Round A of the build is done (loader + dashboard shell). **Round B is half done: the frontend (F1.5–F1.7 + `report.md` renderer) is built but unreviewed; the backend (B1.5–B1.12) has not started** — it was deliberately not dispatched while the loader was missing.
 
 ---
 
@@ -184,32 +184,37 @@ Third, softer: the CFO owes four `unset` values in the bar-data annex (`sigma_wi
 
 Step 0, then five dispatches in three batches. Paths are disjoint, verified, so batch 1 runs in parallel.
 
-### Step 0 — do this BEFORE Batch 1: recover the data loader
+### Step 0 — DONE (2026-09-20): the data loader is recovered and in the repository
 
-`backtest-bot/src/bitbull/data/` (the OHLCV loader, reported at 795 lines: `errors`, `schema`, `manifest`, `bar`, `_timestamps`, `loader`, `adjustment`) and its tests were **never committed** — a bare `data/` rule in `.gitignore` ignored them. The rule is fixed; the files are not in the repository. Batch 1 builds on this package, so do not start it without it.
+`backtest-bot/src/bitbull/data/` (the OHLCV loader: `errors`, `schema`, `manifest`, `bar`, `_timestamps`, `loader`, `adjustment`) and its tests had **never been committed** — a bare `data/` rule in `.gitignore` ignored them.
 
-1. Ask the original cloud session (**"Bitbull Capital agent organization"**) to commit and push `src/bitbull/data/` and its tests (`tests/bitbull/data/`, plus any loader tests elsewhere), or — if it is unrecoverable — have the `backend-developer` rebuild it from `backtest-engine-contract-v1` §5 and `bar-ingestion-and-run-fields-v1` §2, with `qa-tester` review.
-2. Place the files under `backtest-bot/`, confirm `git status` shows them as **untracked, not ignored** (`git check-ignore -v <file>` must print nothing), and run the bot suite. **Expected result: about 105 passed, 0 failed** — derived from the original handoff's 148 passed overall minus the 43 org-tooling tests that pass; the loader's own tests are missing along with the loader (this clone has 61 bot tests, 44 fewer than that). Treat the figure as an estimate to confirm, not a target to match; what is not negotiable is **0 failed** in the bot suite.
-3. Commit and push through the push gate (§13).
+**Resolved.** The source was found on the remote branch **`recovery/data-loader`, commit `9d2ccc8`** (*"Recover the OHLCV data loader that .gitignore silently swallowed"*) and re-homed under `backtest-bot/`: 795 lines of source and 521 lines of tests (`tests/bitbull/data/test_loader.py`, `test_manifest.py`), measured with `wc -l` excluding `__pycache__`. `git check-ignore -v` prints nothing for them, and a secret scan of the diff was clean.
 
-### Batch 1 — three agents at once, then commit and push (through the push gate, §13)
+**The 6 loader-shaped test failures are gone.** Measured after recovery: bot suite **231 passed / 0 failed**. That is the number to reproduce, not the ~105 this section previously estimated — the estimate was low because it did not count the loader's own tests or the frontend's Round B tests.
 
-**1. `backend-developer`** — B1.5–B1.12 in one dispatch:
+**Follow-up, not part of any push round:** `recovery/data-loader` still exists on the remote. Deleting it is a separate decision for the founder; do not delete a remote branch as a side effect of a build round.
+
+### Batch 1 — status: `cfo` and `frontend-developer` are done; `backend-developer` has not run
+
+**`frontend-developer` (F1.5–F1.7 + `report.md` renderer) — BUILT 2026-09-20, NOT YET REVIEWED by the CTO.** Build log: `workspaces/engineering/work/2026-09-20-frontend-f15-f17-build-log.md`. Two gaps it declared itself: **the explorer's inline JS has never been executed** (no browser or Node in this environment), and **the equity-curve chart is not built** (needs a CTO ruling on whether chart geometry is exempt from the no-arithmetic boundary test). It also raised seven questions for the CTO. None of this is reviewed work, and unreviewed work is never ready for the founder.
+
+**`cfo` (the two rulings) — RULED 2026-09-20**, in `workspaces/finance/work/2026-09-20-cfo-batch1-rulings.md`. The directed spec amendments are **not yet applied**; they land as versioned files (`ema-crossover-btc-1h-v1.1`, `bar-data-annex-v2`), never as in-place edits to `specs/`.
+
+**Still to dispatch — `backend-developer`** — B1.5–B1.12 in one dispatch (the loader it depends on now exists):
 event loop · risk gate (shared code path with paper) · mode fail-closed · bar fill simulator · cost fail-closed · **EMA computation + metrics** · manifest and touch ledger · sweep/null/plateau · alerting · determinism.
 Builds against: `specs/2026-09-13-backtest-engine-contract-v1.md`, `bar-data-backtest-annex-v1.md`, `bar-ingestion-and-run-fields-v1.md`, `ema-crossover-btc-1h-rules-and-dashboard-v1.md`.
 
-**2. `frontend-developer`** — F1.5–F1.7:
-cost-unset state · results view · **EMA explorer with heatmap, plateau region and null band** (the founder's actual ask) · `report.md` renderer generated from `run.json` by a function with no engine access.
-Binding CFO requirements: no best-returns leaderboard; confidence interval as visible as the headline number; synthetic data unmissable; cost-refused is a designed state, not an empty panel.
-
-**3. `cfo`** — two rulings that gate correctness:
-(a) the `(9,20)` pair-index off-by-one — the EMA spec says "pair #17", lexicographic enumeration says index 16, and this decides **which configuration is the founder's baseline of record**; (b) the four `unset` annex values.
+The binding CFO requirements that shaped the frontend, for reference when reviewing it: no best-returns leaderboard; confidence interval as visible as the headline number; synthetic data unmissable; cost-refused is a designed state, not an empty panel.
 
 ### Batch 2 — `qa-tester`, after the backend lands
 P1–P6 in one dispatch: refusals · leakage battery including two-arm differential replay · EMA correctness against an independent oracle · cost/metric oracles · determinism · failure injection · dashboard gate. Ends in a release verdict.
 
 ### Batch 3 — `cto`
-Single review of everything, the F1.3 fake-cash wording question (the rendered pages say "simulat…" but never "fake cash" — accept or send back), accept-or-reject the builds, then sign-off. Then CEO approval → founder final review.
+Single review of everything, accept-or-reject the builds, then sign-off. Then CEO approval → founder final review. Rulings owed at this review, now accumulating:
+- **F1.3 fake-cash wording** — the rendered pages say "simulat…" but never "fake cash": accept or send back.
+- **Chart geometry vs. the no-arithmetic boundary test** — blocks the equity-curve chart and the gross-vs-net bar visual.
+- **Where `write_report_md(run_dir)` is called at run finish**, given the engine must not import `bitbull.ui`.
+- The frontend's other four open questions (CI level, `window_label` vocabulary, `gate_2_pass: null` in sweep cells, heartbeat staleness threshold) — several route on to the CFO as contract additions.
 
 **Push after every batch — and every push goes through the push gate (§13): QA verifies, the CTO approves, then it is pushed.**
 
@@ -262,7 +267,7 @@ git checkout claude/bitbull-capital-org-structure-eiiv8c
 # The bot is its own codebase: Python 3.11 + uv (uv 0.8.17 / Python 3.11.15 used originally)
 cd backtest-bot
 uv sync --frozen
-uv run --frozen pytest -q          # currently 55 passed, 6 failed (the missing data loader)
+uv run --frozen pytest -q          # measured 2026-09-20: 231 passed, 0 failed
 
 # Render the dashboard against the fixtures
 uv run --frozen python -m bitbull.ui.dash_cli tests/fixtures/runs /tmp/dashout
@@ -312,42 +317,37 @@ work committed locally → QA verifies (from a FRESH CLONE, not this working tre
 
 ---
 
-## 14. RESUME HERE — three commits are waiting on one QA verification (2026-09-20)
+## 14. RESUME HERE — where the work actually is (2026-09-20)
 
-**Read this section first if you are the session that picks this up.** Nothing is broken; a push is deliberately stopped inside its own gate, which is the gate working.
+**Read this section first if you are the session that picks this up.** Do not trust any SHA written here — run `git log --oneline -5` and `git ls-remote origin claude/bitbull-capital-org-structure-eiiv8c` and believe those.
 
 ### Where things stand
 
 | | |
 |---|---|
-| Remote branch `claude/bitbull-capital-org-structure-eiiv8c` | At `089caa1` (org/bot separation and docs) — **pushed, verified** |
-| Local, not pushed | `8079c73` *"Add the push gate…"* · `8a99ecb` *"Harden the push gate…"* · and the CTO's fix commit on top of them (its SHA: **see `git log`** — do not quote a hash you have not read) |
-| `8a99ecb` | **HELD by the `cto`**, not approved. Reasons and evidence: `workspaces/engineering/work/2026-09-20-cto-push-gate-review.md`. Its record `governance/approvals/2026-09-20-push-gate-hardening.md` is **superseded and must not be reused** |
-| The fix commit | Authored by the `cto` (`scripts/**` is cto-only): five real bypasses of the gate closed — refs/replace, add-then-remove across commits, merges in the approved range, `diff.ignoreSubmodules`, quoted front-matter keys — plus non-ASCII record names and `.`/`..`/`.git` path components. 12 regression tests, each demonstrated failing against `8a99ecb`. Evidence: `workspaces/engineering/work/2026-09-20-cto-push-gate-fix.md` |
-| Measured after the fix (working tree, pending fresh-clone re-verification) | bot **55 passed / 6 failed**, org tooling **43 / 8**, push gate **63 / 0** |
+| The push gate | **Working and closed.** Three gate commits went through a full QA → CTO chain and were pushed on 2026-09-20. Records: `governance/approvals/2026-09-20-push-gate-r2.md`, evidence `2026-09-20-qa-evidence-gate-r2.md` |
+| Data loader | **Recovered and committed** — §8 Step 0 is done. Source: remote branch `recovery/data-loader` @ `9d2ccc8`. The 6 loader-shaped test failures are gone |
+| Frontend Round B (F1.5–F1.7 + `report.md`) | **Built, committed, and NOT REVIEWED.** The founder directed it be pushed together with the loader rather than held back. It carries two declared gaps: the explorer's inline JS has never been executed, and the equity-curve chart is not built. Build log: `workspaces/engineering/work/2026-09-20-frontend-f15-f17-build-log.md` |
+| Backend Round B (B1.5–B1.12) | **Not started.** It was deliberately not dispatched while the loader was missing; that reason is now gone |
+| CFO Batch-1 rulings | **Ruled**, amendments **not yet applied** to `specs/`: `workspaces/finance/work/2026-09-20-cfo-batch1-rulings.md` |
+| Tests, measured in the working tree 2026-09-20 | bot **231 / 0**, org tooling **43 / 8** (known), push gate **63 / 0**. Total **337 passed / 8 failed** |
 | Push gate installed in this clone | Yes: `git config core.hooksPath` prints `.githooks`. Git identity is set locally (`bitbullcapitalllc`). Re-run `git config core.hooksPath .githooks` in any other clone |
 
-### Why the push has not happened
-
-The founder set a rule: **no push without the CTO's approval, after the CTO confirms with the tester.** The gate has now stopped two pushes on its own merits:
-
-1. QA's fresh-clone verification of `8079c73` came back **FAIL** — rename-into-approvals bypass, force-push allowed, duplicate keys. Fixed in `8a99ecb`. That verification was done by a **stand-in** (a general-purpose agent told to act as `qa-tester`), which the founder rejected as a way to sign. Use that record only as a description of the three findings, never as an approval.
-2. The `cto` then **HELD** `8a99ecb`: the code read history through `refs/replace/*` and compared only two end points, and the file's own "honest limits" did not say so. Fixed in the commit now at the tip, which also rewrites those limits to be true.
-
-Full account: `governance/decision-log.md`.
-
-### Do this, in order
+### What a push round looks like, every time
 
 1. **Start the session in `C:\Users\capit\BitbullCapOrg`** (that is what loads `CLAUDE.md` and `.claude/agents/`). **Confirm the real agents loaded** before doing anything else: a call to `qa-tester` and `cto` by name must not return *"Agent type not found"*. If it does, stop and tell the founder.
-2. Read `governance/policies/push-checklist.md`. Do **section A** for the working tree (including `git status --ignored`), then commit anything still uncommitted. Record the tip SHA — that is the commit QA verifies (`git log --oneline -1`; do not carry a hash from this file).
-3. **Real `qa-tester`**, via the courier exception: verify **that SHA from a fresh clone** (`git clone --no-hardlinks`), running section B. Expected: bot **55 passed / 6 failed** (the missing loader), org tooling **43 / 8** (known), push gate **63 / 0**; anything else is a finding. Ask it to **attack the gate again** — try to defeat all five closed bypasses and look for new holes — and to save its report to disk as it goes. The script's own docstring lists the limits that remain open and accepted.
-4. **Real `cto`**: reads QA's evidence and the diff (in full for `scripts/check_push_approval.py`, `.githooks/pre-push`, `tests/test_push_gate.py`, `workspaces/registry.json`) and decides `APPROVED` or `HELD` in a **new** record from `governance/templates/push-approval.md`, filling only its own block. The superseded `2026-09-20-push-gate-hardening.md` record is audit trail — never reused. If QA or the CTO holds it, fix and repeat from step 2. **You are transport; you do not sign for either.**
-5. Commit the completed record in a commit that changes **only** added or modified `*.md` files under `governance/approvals/`, then `git push origin claude/bitbull-capital-org-structure-eiiv8c`. The hook checks the record. **Never `--no-verify`, never force.** Then `git ls-remote origin <branch>` must equal the local tip — report the SHA, and report a hung or refused push as exactly that.
-6. Log the dispatches in `workspaces/exec/work/token-ledger.md` **in the next change** — the ledger cannot be edited between the commit QA verifies and the push, because the gate allows only approval records to change after it.
+2. Read `governance/policies/push-checklist.md`. Do **section A** for the working tree (including `git status --ignored`), update the docs the change touches with **measured** numbers, then commit. Record the tip SHA — that is the commit QA verifies (`git log --oneline -1`; never carry a hash from this file).
+3. **Real `qa-tester`**, via the courier exception: verify that SHA **from a fresh clone** (`git clone --no-hardlinks`), running section B. Expect the known-red set above; anything else is a finding. Tell it to **write its evidence file first and append command by command** — a summary written first is the part that survives a session death and the part that is worthless alone.
+4. **Before dispatching the CTO, confirm QA's evidence file exists on disk.** A record citing an artifact that is not there costs a held signature and a full re-dispatch — that is exactly what happened on 2026-09-20, at ~305,621 measured tokens.
+5. **Real `cto`**: reads QA's evidence and the diff, and decides `APPROVED` or `HELD` in a **new** record from `governance/templates/push-approval.md`, filling only its own block. A held record is never reused; it is audit trail. **You are transport; you do not sign for either.**
+6. Commit the completed record in a commit that changes **only** added or modified `*.md` files under `governance/approvals/`, then `git push origin claude/bitbull-capital-org-structure-eiiv8c`. **Never `--no-verify`, never force.** Then `git ls-remote origin <branch>` must equal the local tip — report the SHA, and report a hung or refused push as exactly that.
+7. Log the dispatches in `workspaces/exec/work/token-ledger.md` **in the next change** — the ledger cannot be edited between the commit QA verifies and the push, because the gate allows only approval records to change after it.
 
-### Still open, not part of the push
+### Still open, and owed to the founder
 
-- **The data loader is missing** (`backtest-bot/src/bitbull/data/`) — §8 Step 0. The obvious source is the cloud session named *"Bitbull Capital agent organization"*; the founder has not yet said to message it.
+- **The unreviewed frontend is in the repository.** Pushing it was the founder's call; whether it is *correct* is still the CTO's, and that review has not happened. Do not build the backend's dashboard-facing fields against it as though it were ratified.
+- **`recovery/data-loader` still exists on the remote.** Now that the loader is merged into the branch, that branch is redundant. Deleting it is a founder decision and must not be done as a side effect of a build round.
 - **GitHub branch protection** (require a pull request and a passing check) is the only complete enforcement of the push gate, and is a founder-side setting that is not enabled. Until it is, the gate is a local hook: `--no-verify`, a clone without the hook, an edit to the script, or a push through a GitHub API client all go around it.
 - **One founder-visible wording question, raised by the CEO, not settled:** the record template says the author "must not be the signer of sections 2 or 3", but `scripts/**` is `cto`-only, so the CTO must author its own gate fixes and also signs section 3. The compensating control is QA's adversarial fresh-clone verification. The CTO proposes the line become "must not be the QA signer", with the CTO-as-author case named as an exception. **Not changed pending the founder.**
+- The CTO's three gate follow-ups (checker-vs-tip mismatch must block; unicode-ignorable `.git` look-alike path components; malformed hook stdin), and the checklist §B secret-scan item.
 - **Environment on this machine:** `uv` is not on PATH — use `python -m uv`; set `PYTHONUTF8=1` for any Python; the bot's env lives in `backtest-bot/.venv` (rebuild with `python -m uv sync --frozen`); `gh` is not installed; `git push` needed an interactive GitHub sign-in the first time and then worked.

@@ -138,6 +138,6 @@ SHARED
 
 Fake cash only. No live capital, no venue connectivity, no entity work. The CLO is on hold by founder instruction, so every per-venue legal item is deferred and blocks a live promotion, not research.
 
-Live work: the **EMA crossover backtesting bot** — BTC, 1h, 1 year, EMA 9/20, plus a dashboard where the founder selects the EMA values. Stages 1–7 of the founder's chain are complete and Round A is built. **See `HANDOFF.md` §6–§8 for exact state, the two blockers, and the approved next steps.**
+Live work: the **EMA crossover backtesting bot** — BTC, 1h, 1 year, EMA 9/20, plus a dashboard where the founder selects the EMA values. Stages 1–7 of the founder's chain are complete, Round A is built, and the data loader has been recovered into the repository (2026-09-20). **See `HANDOFF.md` §6–§8 and §14 for exact state, the two blockers, and the approved next steps.**
 
-**Known gap before building on the engine:** the data loader (`backtest-bot/src/bitbull/data/`) was never committed and is not in this repository — recover it first (`HANDOFF.md` §8, Step 0).
+**Known gap before building on the engine:** the dashboard's Round B (F1.5–F1.7 and the `report.md` renderer) is committed but **unreviewed**, with the explorer's JavaScript never executed and no equity-curve chart built. It is in the branch by founder direction, not by review — do not treat its field assumptions as ratified contract (`docs/backtest-bot/status-and-roadmap.md` §3).

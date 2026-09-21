@@ -130,3 +130,27 @@ The full cost of that one missing file is dispatches 1, 4 and 5 — **305,621 to
 ### Cost-avoidance recorded this round
 
 Four dispatches were **not** made, deliberately: `backend-developer` (B1.5–B1.12, blocked on the absent data loader), and three that would have had to invent a venue-dependent answer. On the measured build-round rate (~211k–217k), not dispatching the backend into a blocked task avoided roughly **200k tokens** that would have produced work built on a package that is not in the repository. Labelled an estimate, basis: the two measured build rounds.
+
+---
+
+## Round 2026-09-20b — the bundled push: loader recovery + frontend Round B + work notes
+
+Dispatcher: CEO session, on the founder's instruction *"Push everything together."* One push round covering three bodies of work rather than three rounds.
+
+| # | Agent | Model | Task | Tokens | Tool calls |
+|---|---|---|---|---:|---:|
+| 1 | `ceo` (this session) | Opus | Run the bundled push round: checklist section A, doc updates, commits, courier to QA and the CTO, push | see note | — |
+| 2 | `qa-tester` | Sonnet | Fresh-clone verification of the bundled tip: full section B, plus the unreviewed frontend | *filled in at hand-back* | |
+| 3 | `cto` | Opus | Review QA's evidence and the diff; decide APPROVED or HELD in a new push-approval record | *filled in at hand-back* | |
+
+**Row 1 is the honest gap in this ledger.** This round's CEO work was itself a sub-agent dispatch, made by the main session — and by the ledger's own rule, *an agent cannot measure its own invocation, only the dispatcher can*. The figure for row 1 therefore has to come from the session that dispatched the CEO, not from the CEO. It is recorded as **owed, not estimated**. Rows 2 and 3 are measured by this session at hand-back.
+
+### The dispatch decision this round, and why
+
+**Two dispatches, not four.** The alternative shape was three separate push rounds — one for the loader, one for the frontend, one for the docs and work notes — which at the measured rate of ~148k (QA) plus ~101k (CTO) per gate round would have cost roughly **750k tokens** for the same content. Bundling them cost one QA pass and one CTO signature. Estimate, basis: the two measured gate rounds on 2026-09-20.
+
+That is the founder's call rather than a cost optimisation, and the trade-off is real and worth naming: **a bundled push means one verdict over three unrelated bodies of work.** If QA or the CTO holds any part of it, the whole tip is held — the loader, which is clean and wanted, waits on the frontend, which is unreviewed and known to have gaps. Three rounds would have let the loader land on its own merits. The founder chose throughput; the risk is a single hold blocking everything, and it should be re-weighed if this round holds.
+
+**No `frontend-developer` re-dispatch.** The Round B work was already on disk from round 2026-09-20 and was pushed as-is, unreviewed, by founder direction. Sending it back for a polish pass before review would have cost another build round (~211k measured) to fix gaps that the CTO has not yet asked to be fixed. The gaps are documented instead — in the commit message, in `HANDOFF.md` §6 and §14, and in `docs/backtest-bot/status-and-roadmap.md` §3 issues 8–10 — which is the cheap version of the same information. **Documenting a gap is not closing it**, and none of the above should be read as the frontend being finished.
+
+**No `backend-developer` dispatch.** Its blocker — the missing loader — cleared this round, but starting a ~211k-token build round *inside* a push round would have changed the tip under QA's feet. It is the next round's first dispatch.

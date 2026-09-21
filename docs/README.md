@@ -54,8 +54,10 @@ The org **produces** the bot: executives write the specifications, the engineeri
 
   | Marker | Meaning |
   |---|---|
-  | **BUILT** | Implemented in the repository and covered by tests |
-  | **BUILT, NOT IN REPO** | Reported as implemented, but the source is not in this repository (see [status](backtest-bot/status-and-roadmap.md)) |
+  | **BUILT** | Implemented in the repository, covered by tests, and reviewed |
+  | **BUILT, UNREVIEWED** | Implemented and committed, but **no reviewer has accepted it**. It is in the repository by a decision to commit, not by a decision that it is correct. Its assumptions are not ratified and nothing downstream may depend on them |
+  | **PARTIAL** | Some of the requirement is implemented; the doc says exactly which part is not |
+  | **BUILT, NOT IN REPO** | Reported as implemented, but the source is not in this repository. *(No component carries this marker as of 2026-09-20 — the data loader, the only one that did, was recovered. Kept in this legend because the failure mode recurs.)* |
   | **SKELETON** | The module exists and raises `NotImplementedError`; it is a placeholder, never a working stub |
   | **NOT STARTED** | Specified but no code exists |
 

@@ -52,7 +52,8 @@ flowchart TD
         A["Import-graph tests<br/>strategy may not import data, execution, risk"]
         B["AST tests<br/>no float money, UI computes no metric,<br/>no network in ui"]
         C["Fixture self-checks<br/>33 pairs, no rank or best key,<br/>nulls carry reason codes"]
-        D["UI tests<br/>provenance, overlay, render,<br/>schema refusal"]
+        D["UI tests<br/>provenance, overlay, render, schema refusal,<br/>cost-unset state, results, explorer, report.md"]
+        L["Loader tests<br/>sidecar validation, sha256 on read,<br/>refusal reason codes, manifest"]
     end
     subgraph PLANNED["Required by the engine contract, with the engine"]
         E["Determinism<br/>three-run protocol, hash-seed invariance"]
