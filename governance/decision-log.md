@@ -150,3 +150,19 @@ Append-only. One entry per decision that commits money, is hard to reverse, or t
 - **Approved by:** Founder (directed this structure)
 - **Record:** —
 - **What would reverse this:** The structure proving too heavy for the firm's size, or a change in how the founder wants to interact with the team.
+
+---
+
+## 2026-09-20 — The three gate commits are pushed; tip `588e3d2`
+
+**Decision.** Push the push-gate work to `origin/claude/bitbull-capital-org-structure-eiiv8c` after a complete QA → CTO chain over tip `18b3b6a`. Remote verified at `588e3d2da0635510f50e2623d7a4cb2db554802e` by `git ls-remote`, equal to the local tip.
+
+**Rationale.** QA verified `18b3b6a` from a fresh clone (bot 55/6 known, org tooling 43/8 known, push gate 63/0; spec_lint, boundary audit, fixtures and doc links all clean; per-commit secret scan clean) and signed PASS WITH NOTED RISK. The CTO **first held** the push — the QA evidence file the record cited did not exist on disk, and §D of the checklist requires the CTO to read QA's real output, not its verdict line. QA re-verified, wrote the evidence incrementally (1,678 lines), and section 2 reproduced exactly. The CTO then approved, accepting four residual risks as documented and non-blocking.
+
+**Who approved.** `qa-tester` (section 2), `cto` (section 3). The CEO session was courier and pusher only and signed nothing. Record: `governance/approvals/2026-09-20-push-gate-r2.md`; evidence: `governance/approvals/2026-09-20-qa-evidence-gate-r2.md`.
+
+**What would reverse it.** Nothing reverses a push; the branch is not protected and the work is governance, tooling, tests and docs only — no venue client, no credential, no order path. A defect found in the gate is fixed forward through the same chain.
+
+**What this decision cost, and the lesson.** A session limit killed the first QA run *after* it wrote its summary and *before* it wrote the evidence it cited. Recovering from that one missing file took three dispatches and ~305,621 measured tokens. The standing instruction — write the artifact first and append command by command, summary last — is what fixed it, and it now has a price tag attached.
+
+**Held open, and owed to the founder.** GitHub **branch protection** is the only complete enforcement of this gate and is a founder-side setting that is still not enabled. Until it is, `--no-verify`, a clone without the hook, an edited local checker or a push through a GitHub API client all go around the gate, and QA demonstrated each one concretely. Also open: the CTO's three gate follow-ups (checker-vs-tip mismatch must block; unicode-ignorable `.git` look-alike path components, unverified; malformed hook stdin), the checklist §B secret-scan item, the ungoverned `.gitattributes` and `HANDOFF.md` write rules (CEO), and the template's "author must not be the signer" wording, which still conflicts with `scripts/**` being CTO-only.

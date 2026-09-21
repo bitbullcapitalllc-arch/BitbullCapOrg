@@ -99,3 +99,34 @@ So this ledger was measuring the wrong unit for that lever, and the earlier expe
 | **Fewer dispatches** | Number of invocations | 2 reviews replaced 4 re-runs |
 
 Two of the three are now measured in the unit they actually move. Tiering's saving is real but will never appear in this column — it appears on the bill and in the session limit. Nobody should claim a token-count reduction from it, and nobody should conclude from a flat token count that it did not work.
+
+---
+
+## Round 2026-09-20 — closing the push gate, plus unblocked Batch 1
+
+Dispatcher: CEO session. Figures are **measured** — reported by the harness per agent at hand-back (`subagent_tokens`), not estimated. Tool-call counts as reported.
+
+| # | Agent | Model | Task | Tokens | Tool calls |
+|---|---|---|---|---:|---:|
+| 1 | `cto` | Opus | Rule on section 3 of the r2 push-approval record for tip `18b3b6a` | 55,773 | 13 |
+| 2 | `cfo` | Opus | Batch 1 rulings: the `(9,20)` pair index, and the four `unset` annex values | 72,949 | 8 |
+| 3 | `frontend-developer` | Sonnet | Batch 1 F1.5–F1.7: cost-unset state, results view, EMA explorer, `report.md` renderer | 211,326 | 66 |
+| 4 | `qa-tester` | Sonnet | Re-verify `18b3b6a` from a fresh clone; write the missing evidence file incrementally | 148,643 | 42 |
+| 5 | `cto` | Opus | Re-decide section 3 with the evidence on disk | 101,205 | 22 |
+| | | | **Round total** | **589,896** | **151** |
+
+### What this round cost, and what it bought
+
+**The build round dominates again, as predicted.** The frontend dispatch alone is 211,326 tokens — 36% of the round, and roughly what backend Round A cost (217,213). Four analysis/decision dispatches together came to 378,570. The standing rule holds: *build rounds cost multiples of analysis rounds*, and no work-order tightening changes that, because the cost is the code being written, not the brief being read.
+
+**The two CTO dispatches are the expensive lesson.** Dispatch 1 (55,773) ended in a HOLD, and dispatch 5 (101,205) re-decided the same question — 156,978 tokens for one signature. The cause was not the CTO: QA had been killed by a session limit *after* writing its summary but *before* writing the evidence file it cited, so the record pointed at an artifact that did not exist. The CTO correctly refused to approve a check it could not inspect.
+
+The full cost of that one missing file is dispatches 1, 4 and 5 — **305,621 tokens**, over half the round — to produce a signature that a single uninterrupted QA run would have delivered once.
+
+**The fix is already firm policy and was applied in dispatch 4: write the evidence file first and append command by command, before the summary.** It worked — QA survived, the file landed (1,678 lines), and the numbers reproduced exactly. Generalising it, and this is the transferable lesson: **an agent's deliverable must be written in the order that makes a death recoverable — artifact first, summary last.** A summary written first is the part that survives, and it is the part that is worthless without the evidence behind it.
+
+**Dispatch 5 could not resume dispatch 1.** `SendMessage` is disabled in this session, so continuing the held CTO with its context intact was impossible and a fresh dispatch had to re-orient from scratch. Naming its own prior work note as file 1 and telling it explicitly *not* to re-read the 357-line checker it had already read kept the re-decide to 101,205 rather than a full re-review. Worth knowing for the next session: **if `SendMessage` is unavailable, a "quick follow-up question" to an agent is a full dispatch, priced as one.**
+
+### Cost-avoidance recorded this round
+
+Four dispatches were **not** made, deliberately: `backend-developer` (B1.5–B1.12, blocked on the absent data loader), and three that would have had to invent a venue-dependent answer. On the measured build-round rate (~211k–217k), not dispatching the backend into a blocked task avoided roughly **200k tokens** that would have produced work built on a package that is not in the repository. Labelled an estimate, basis: the two measured build rounds.
