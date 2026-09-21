@@ -2,8 +2,8 @@
 files, plus the acceptance criteria that apply to Round A specifically:
 
   1. Renders correctly from each fixture state, no network access.
-  4. Gross is never rendered on a view where net is absent -- checked here
-     as the stronger Round-A claim: NO metric value renders at all yet.
+  4. Gross is never rendered on a view where net is absent (see
+     test_ui_results.py / test_ui_cost_state.py for the F1.5/F1.6 detail).
   6. An unknown schema_version major refuses to render.
 """
 from __future__ import annotations
@@ -19,9 +19,7 @@ RUNNING = FIXTURES / "20260913T090000Z-fixture-running-ab12cd34" / "run.json"
 FAILED = FIXTURES / "20260913T090500Z-fixture-failed-costmodel-ef56gh78" / "run.json"
 COMPLETED = FIXTURES / "20260913T091500Z-fixture-completed-cd34ef56" / "run.json"
 
-# Values that only exist in the COMPLETED fixture's metrics map. If any of
-# these ever appear in Round A's rendered output, this round has started
-# rendering results (F1.6), which is explicitly out of scope.
+# Values that only exist in the COMPLETED fixture's metrics map.
 COMPLETED_METRIC_VALUES = ("18250.4200", "6021.8800", "0.42", "18250.42", "6021.88")
 
 
@@ -51,18 +49,26 @@ class TestRendersFromEachFixtureState(unittest.TestCase):
             self.assertIn("LATENCY_NOT_EXERCISED_IN_BAR_MODE", out)
 
 
-class TestNoMetricRendersThisRound(unittest.TestCase):
-    def test_completed_fixture_metric_values_do_not_appear_on_the_page(self):
+class TestMetricsRenderOnlyWhereTheyExist(unittest.TestCase):
+    """Round A rendered no metric at all. From Round B (F1.5-F1.7) the
+    completed fixture's metrics render (see test_ui_results.py); the two
+    non-completed fixtures must still show none of them."""
+
+    def test_completed_fixture_metric_values_now_appear(self):
         out = render_run_page_html(_load(COMPLETED))
         for value in COMPLETED_METRIC_VALUES:
-            self.assertNotIn(value, out, f"Round-A page must not render metric value {value!r}")
+            self.assertIn(value, out)
 
-    def test_no_currency_dollar_figure_rendered(self):
-        out = render_run_page_html(_load(COMPLETED))
-        # net/gross pnl strings would appear with no currency symbol in this
-        # contract (decimal strings), but as an extra guard also check no
-        # '$' character sneaks in from a future edit.
-        self.assertNotIn("$", out)
+    def test_non_completed_fixtures_show_no_completed_run_metric_value(self):
+        for path in (RUNNING, FAILED):
+            out = render_run_page_html(_load(path))
+            for value in COMPLETED_METRIC_VALUES:
+                self.assertNotIn(value, out)
+
+    def test_no_currency_symbol_rendered(self):
+        # Fake cash carries the SIMULATED qualifier, never a bare currency symbol.
+        for path in (RUNNING, FAILED, COMPLETED):
+            self.assertNotIn("$", render_run_page_html(_load(path)))
 
 
 class TestSchemaVersionRefusal(unittest.TestCase):

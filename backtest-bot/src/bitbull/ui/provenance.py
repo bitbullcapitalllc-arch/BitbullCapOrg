@@ -65,12 +65,16 @@ def _get(run: dict[str, Any], *path: str) -> Any:
 _ABSENT = object()
 
 
-def _fmt(value: Any) -> str:
+def _fmt_plain(value: Any) -> str:
     if value is _ABSENT:
         return NOT_EMITTED
     if value is None:
         return NULL_PRESENT
-    return html.escape(str(value))
+    return str(value)
+
+
+def _fmt(value: Any) -> str:
+    return html.escape(_fmt_plain(value))
 
 
 def _first_snapshot_file(run: dict[str, Any]) -> dict[str, Any] | None:
@@ -81,7 +85,14 @@ def _first_snapshot_file(run: dict[str, Any]) -> dict[str, Any] | None:
 
 
 def provenance_fields(run: dict[str, Any]) -> list[tuple[str, str]]:
-    """Return the ordered (label, formatted_value) pairs for the header.
+    """HTML-escaped (label, value) pairs for the header. See
+    `provenance_fields_plain` for the same list unescaped (markdown use)."""
+    return [(label, html.escape(value)) for label, value in provenance_fields_plain(run)]
+
+
+def provenance_fields_plain(run: dict[str, Any]) -> list[tuple[str, str]]:
+    """Return the ordered (label, formatted_value) pairs for the header,
+    UNESCAPED plain text.
 
     Bar count is read from manifest.data_snapshot_files[0].row_count -- the
     snapshot's own declared row count -- not from events_consumed, which
@@ -114,7 +125,7 @@ def provenance_fields(run: dict[str, Any]) -> list[tuple[str, str]]:
         ("Window label", _ABSENT if "window_label" not in run else run["window_label"]),
         ("Tag", _ABSENT if "tag" not in run else run["tag"]),
     ]
-    return [(label, _fmt(value)) for label, value in fields]
+    return [(label, _fmt_plain(value)) for label, value in fields]
 
 
 def code_dirty_badge_html(run: dict[str, Any]) -> str:

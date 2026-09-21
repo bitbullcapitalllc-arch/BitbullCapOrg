@@ -2,13 +2,13 @@
 no arithmetic on metric values beyond unit formatting, and that it imports
 nothing from src/bitbull/{strategy,data,execution,risk}."
 
-Round A scope note: this round renders no metric at all (see
-test_ui_render.py's TestNoMetricRendersThisRound), so the stronger,
-easy-to-verify claim enforced here is that src/bitbull/ui/*.py never even
-indexes into a run's "metrics", "sweep" cell "metrics", or
-"cost_and_fill_model" numeric fields. That is a stricter guarantee than "no
-arithmetic on it" and is the correct guarantee for a round that ships no
-results view.
+Round B (F1.5-F1.7) note: metrics now render, so the Round-A rule "no module
+looks up a metric key" became "metric-key lookups are CONFINED to the modules
+that render metrics" (METRIC_MODULES below), and the arithmetic ban now covers
+every display module including the new ones -- the results view, the explorer
+and the report.md renderer perform no arithmetic at all. The single exemption
+is freshness.py (wall-clock heartbeat age, not a metric); dash_cli.py is
+exempt only for pathlib's `/`.
 """
 from __future__ import annotations
 
@@ -47,7 +47,12 @@ class TestNoForbiddenImports(unittest.TestCase):
         self.assertEqual(violations, [])
 
 
-class TestNoMetricKeyTouchedThisRound(unittest.TestCase):
+# Modules allowed to look up metric keys. Everything else (provenance, overlay,
+# render dispatch, cost_state, freshness, dash_cli) must not.
+METRIC_MODULES = ("format.py", "results.py", "explorer.py", "report_md.py")
+
+
+class TestMetricKeysConfinedToMetricModules(unittest.TestCase):
     """AST-based, not a bare text grep: a docstring that *mentions* the word
     "metrics" while explaining the boundary (as this package's own module
     docstrings do) is not a violation. A Subscript or `.get(...)` call that
@@ -57,6 +62,8 @@ class TestNoMetricKeyTouchedThisRound(unittest.TestCase):
     def test_no_metrics_key_actually_looked_up_in_ui_package(self):
         offenders = []
         for py_file in _ui_py_files():
+            if py_file.name in METRIC_MODULES:
+                continue
             tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
             for node in ast.walk(tree):
                 literal = None
@@ -72,7 +79,7 @@ class TestNoMetricKeyTouchedThisRound(unittest.TestCase):
                     literal = node.args[0].value
                 if isinstance(literal, str) and literal in FORBIDDEN_KEY_LITERALS:
                     offenders.append((py_file.name, literal, node.lineno))
-        self.assertEqual(offenders, [], f"Round A must not touch metric keys: {offenders}")
+        self.assertEqual(offenders, [], f"metric keys looked up outside the metric modules: {offenders}")
 
 
 class TestNoArithmeticOperatorsAppliedToDictLookups(unittest.TestCase):
@@ -88,7 +95,9 @@ class TestNoArithmeticOperatorsAppliedToDictLookups(unittest.TestCase):
     not silently loosen.
     """
 
-    DISPLAY_LOGIC_FILES = ("provenance.py", "overlay.py", "render.py")
+    # Every ui module except dash_cli.py (pathlib `/`) and freshness.py
+    # (wall-clock heartbeat age; documented exemption in its docstring).
+    EXEMPT_FILES = ("dash_cli.py", "freshness.py", "__init__.py")
 
     # ast.BitOr also fires for PEP 604 `X | None` union type annotations,
     # which are not arithmetic; excluded by operator type, not by file, so a
@@ -99,7 +108,7 @@ class TestNoArithmeticOperatorsAppliedToDictLookups(unittest.TestCase):
     def test_no_arithmetic_binop_nodes_in_display_logic_files(self):
         offenders = []
         for py_file in _ui_py_files():
-            if py_file.name not in self.DISPLAY_LOGIC_FILES:
+            if py_file.name in self.EXEMPT_FILES:
                 continue
             tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
             for node in ast.walk(tree):
