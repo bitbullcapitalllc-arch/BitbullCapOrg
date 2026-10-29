@@ -184,3 +184,19 @@ Append-only. One entry per decision that commits money, is hard to reverse, or t
 **Who approved.** `qa-tester` (section 2 of the record) and `cto` (section 3), over the exact tip, per `governance/policies/push-checklist.md`. The CEO session updated the docs, committed, carried the work between them, and pushed. **It signed nothing.**
 
 **What would reverse it.** Nothing reverses a push, and nothing here can reach a venue, hold a credential or place an order. The reversible decision is the *bundling*: if this round is held, or if the unreviewed frontend later has to be substantially redone, revert to one push round per body of work and accept the extra gate cost.
+
+---
+
+## 2026-10-29 — Install the third-party day-trader skill pack, all 11 skills as published
+
+**Decision.** On the founder's instruction (*"https://github.com/Jakeschincariol/day-trader-skill — install skill"*), vendor the pack's 11 `trader-*` skill folders into `.claude/skills/`, byte-identical to upstream commit `3d0f4ef6986f4984b7c6bd46f7ff4f87744c3abd` (MIT, notice kept in `.claude/skills/LICENSE.day-trader-skill`). Provenance, a verification recipe and the charter caveats are in `.claude/skills/README.md`.
+
+**What the CEO checked before installing.** Every `SKILL.md` read for instructions that would redirect an agent: none found. Python tools are standard library only; network reads go to Yahoo Finance, stooq, Nasdaq Trader, SEC EDGAR and the House Clerk disclosures site; the one `subprocess` call runs `pdftotext` on a downloaded PDF. No tool in the pack calls a broker; `trader-broker` only builds tickets that a broker connector would carry. Upstream's own offline suite, run in a clone of the pinned commit on 2026-10-29: **315 tests, OK** (Python 3.13.17).
+
+**The founder's choice, against a charter conflict the CEO raised first.** `trader-broker` routes orders to **Alpaca** or **Interactive Brokers**: neither is one of the four venues. Its gate (a `trader-risk` PASS, a typed "yes", the connector's Allow-once card) is not the signed analyst → CFO → CEO → founder record that `governance/approval-policy.md` requires before the `trader` executes. Its description auto-triggers on "execute", "buy it" and "flatten", which overlap the `trader` role. The CEO offered three options: install all 11 with `trader-broker` set to manual-only (recommended), install 10 without the broker, or install all 11 unmodified. **The founder chose all 11 unmodified.**
+
+**Why this is not a live-capital or new-venue approval.** No broker connector is configured in this repository and no credential is held, so as installed nothing can place an order. Connecting Alpaca or IBKR, or acting on anything the pack produces, is still a new venue and still goes through the full chain. The pack's "yes" is not a firm approval and no agent may treat it as one.
+
+**Who approved.** Founder (directed it). The push carrying it goes through the QA → CTO push gate like any other.
+
+**What would reverse it.** Any sign an agent auto-invoked `trader-broker` on a firm "execute" request; a broker connector being added to this repository; or upstream changes we would want to pull. The cheap fixes: add `disable-model-invocation: true` to `trader-broker/SKILL.md`, or delete `.claude/skills/trader-broker/`. Removing the whole pack is deleting `.claude/skills/trader-*` and the licence file.

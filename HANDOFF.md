@@ -118,6 +118,8 @@ Exception the founder granted explicitly for the current initiative: **strategy-
 CLAUDE.md              Charter — auto-loaded every session. Slim by design.
 .claude/foundation.md  Mandate, 9 rules, principles, messaging. NOT auto-loaded; read it.
 .claude/agents/*.md    The 10 role definitions
+.claude/skills/        Third-party day-trader pack (11 trader-* skills), vendored verbatim 2026-10-29.
+                       Out-of-mandate broker path; NOT a firm approval route. Read its README.md
 HANDOFF.md             This file
 specs/                 7 published cross-team contracts — the source of truth for builds
 governance/            approval-policy, decision-log, risk + paper policies, templates

@@ -60,6 +60,7 @@ Four ideas hold the design together:
 | `.claude/foundation.md` | Mandate, ten firm-wide rules, messaging rules | `ceo` |
 | `.claude/agents/*.md` | The ten role definitions | `ceo` |
 | `.claude/commands/*.md` | Slash commands for recurring workflows | `ceo` |
+| `.claude/skills/` | Project skills. Today: the third-party day-trader pack (11 `trader-*` skills), vendored verbatim; provenance and charter caveats in its `README.md` | `ceo` |
 | `governance/` | Approval policy, decision log, risk and paper-trading policies, templates, signed approvals | per `registry.json` |
 | `workspaces/` | The rooms, their messages and work notes, and `registry.json` | that room's members; registry is `ceo` only |
 | `scripts/` | `msg.py` (messaging), `check_boundaries.py` (audit), `spec_lint.py` (spec citations), `check_push_approval.py` (push gate) | `cto` |

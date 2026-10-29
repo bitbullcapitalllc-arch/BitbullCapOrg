@@ -154,3 +154,14 @@ That is the founder's call rather than a cost optimisation, and the trade-off is
 **No `frontend-developer` re-dispatch.** The Round B work was already on disk from round 2026-09-20 and was pushed as-is, unreviewed, by founder direction. Sending it back for a polish pass before review would have cost another build round (~211k measured) to fix gaps that the CTO has not yet asked to be fixed. The gaps are documented instead — in the commit message, in `HANDOFF.md` §6 and §14, and in `docs/backtest-bot/status-and-roadmap.md` §3 issues 8–10 — which is the cheap version of the same information. **Documenting a gap is not closing it**, and none of the above should be read as the frontend being finished.
 
 **No `backend-developer` dispatch.** Its blocker — the missing loader — cleared this round, but starting a ~211k-token build round *inside* a push round would have changed the tip under QA's feet. It is the next round's first dispatch.
+
+## Round 2026-10-29 — install the third-party day-trader skill pack
+
+Dispatcher: the main CEO session, on the founder's instruction *"https://github.com/Jakeschincariol/day-trader-skill — install skill"*. The CEO did section A and the install itself (no build agent); the only dispatches are the push gate's two.
+
+| # | Agent | Model | Task | Tokens | Tool calls |
+|---|---|---|---|---:|---:|
+| 1 | `qa-tester` | Sonnet | Fresh-clone verification of the install commit: section B, plus byte-identity of `.claude/skills/trader-*` against upstream `3d0f4ef` | *measured at hand-back; recorded in the next change* | |
+| 2 | `cto` | Opus | Review QA's evidence and the diff; decide APPROVED or HELD in a new push-approval record | *measured at hand-back; recorded in the next change* | |
+
+The figures cannot be written here: the gate allows only approval records to change between the commit QA verifies and the push. They are reported to the founder in the session at hand-back and belong in this table in the next change.

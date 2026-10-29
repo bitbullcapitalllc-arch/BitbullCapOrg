@@ -11,6 +11,9 @@ config.local.*
 # Trading/runtime output that must not live in the repo
 logs/
 *.log
+# Runtime folder of the vendored day-trader skills (.claude/skills/trader-*): orders,
+# portfolio, broker log, and config.json holding the SEC User-Agent (a name and email)
+/trader/
 # Market-data snapshots. ANCHORED to the two data roots on purpose: a bare `data/`
 # matches a directory of that name at any depth and silently ignored the source
 # package backtest-bot/src/bitbull/data/ (the OHLCV loader), so it never reached git.

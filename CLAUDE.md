@@ -114,7 +114,8 @@ Two separate things live in this repository. **Do not mix them.** Documentation 
 ```
 THE ORG — the firm (agents, rooms, rules, approvals)          docs/org/
   CLAUDE.md              This file — standing instructions, auto-loaded
-  .claude/               foundation.md, the 10 role definitions, slash commands
+  .claude/               foundation.md, the 10 role definitions, slash commands,
+                         skills/ (third-party day-trader pack, vendored verbatim; see its README)
   governance/            Approval policy, decision log, risk and paper policies, templates
   workspaces/            The rooms + registry.json; messages/ is the conversation record
   scripts/               msg.py (messaging), check_boundaries.py (audit)

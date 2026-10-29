@@ -53,7 +53,7 @@ uv run --frozen python -m bitbull.ui.dash_cli tests/fixtures/runs /tmp/dashout
 |---|---|
 | `CLAUDE.md` | Operating charter — auto-loaded every session |
 | `HANDOFF.md` | Onboarding for a new orchestrator session: state, blockers, next steps |
-| `.claude/` | `agents/` (the ten role definitions), `commands/`, `foundation.md` |
+| `.claude/` | `agents/` (the ten role definitions), `commands/`, `skills/` (the vendored third-party day-trader pack), `foundation.md` |
 | `governance/` | Approval policy, templates, signed records, decision log, risk and paper policies |
 | `workspaces/` | The rooms plus `registry.json` — membership and write access |
 | `scripts/` | `msg.py`, `check_boundaries.py`, `spec_lint.py`, `check_push_approval.py` (push gate) |
